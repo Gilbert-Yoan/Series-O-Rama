@@ -93,6 +93,8 @@ WHERE ids IN (SELECT ids FROM Aimer WHERE );
 
 --PARTIE X - CALCUL DE LA PREVISION UNE FOIS TOUTES LES SIMILARITES CALCULEES
 
+--https://www.postgresql.org/docs/9.1/queries-with.html
+
 
 
 
