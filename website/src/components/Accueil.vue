@@ -10,10 +10,13 @@
       <v-spacer></v-spacer>
       <v-col>
         <v-text-field
+        v-model="StringRecherche"
         :label="$t('Seach')"
         hide-details="auto"
         ></v-text-field>
+        
     </v-col>
+    <v-icon @click="CoupeChaineRecherche()">{{icon.mdiMagnify}}</v-icon>
      <v-spacer></v-spacer>
     <v-btn
         elevation="2"
@@ -38,13 +41,11 @@
             @click="Login()"
             >{{$t('Login')}}
         </v-btn>  
-    
-    
-  
- 
     <v-divider
         vertical
     ></v-divider>
+     <v-icon v-if="IsConnect ==true" @click="AddSerie()">{{icon.mdiPlusBox}}</v-icon>
+    
      <v-btn 
      @click="changeLangueEN()"
       plain>
@@ -129,11 +130,16 @@
 
 <script>
 
-import LocaleLangue from "../i18n"
+import LocaleLangue from "../i18n" 
+import { mdiMagnify,mdiPlusBox  } from '@mdi/js';
 export default ({
 
   data :() => ({
-     
+      icon:{
+        mdiMagnify,
+        mdiPlusBox 
+      },
+        StringRecherche:"",
          IsConnect:false,
          Series:[
              
@@ -186,6 +192,24 @@ export default ({
             this.$router.push({
                 name:"Reco"
             })
+        },
+        CoupeChaineRecherche(){
+        var table = this.StringRecherche.split(" ")
+        var StringFinal = ""
+        StringFinal = StringFinal +"("
+        for (const mot of table) {
+          StringFinal = StringFinal +"'"+ mot +"',"
+        }
+        
+        StringFinal = StringFinal.substring(StringFinal.length-1,0);
+        StringFinal = StringFinal +")"
+        console.log(StringFinal)
+        },
+        AddSerie(){
+            this.$router.push({
+              name:"AddSeries"
+            })
+
         }
 
     },

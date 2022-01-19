@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Accueil from '../components/Accueil.vue'
 import Reco from '../components/Recommendation.vue'
+import AddSerie from '../components/AddSeries.vue'
 Vue.use(VueRouter)
 
 const routes = [
@@ -12,6 +13,11 @@ const routes = [
     component: Reco,
     name: 'Reco'
     
+  },
+  {
+    path:'/AddSeries',
+    component :AddSerie,
+    name:'AddSeries'
   },
   {
     path: '*',
