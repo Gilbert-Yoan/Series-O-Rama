@@ -2,7 +2,7 @@
 
 ## Project setup
 ``` 
-"npm install vue" dans un cmd dans  le folder Series-O-Rama
+"npm install -g @vue/cli" dans un cmd dans  le folder Series-O-Rama
 
 Ou 
 

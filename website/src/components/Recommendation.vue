@@ -73,21 +73,46 @@
         <v-col
           v-for="Serie in Series"
           :key="Serie.id"
-          cols="auto"
-          md="auto"
+          cols="12"
+          md="4"
         >
           <v-item >
-             <v-chip >
-          
-          {{Serie.name}}{{" "}} <v-rating
- 
-  length="1"
-  readonly
-  size="20"
-  value="3"
-></v-rating>{{Serie.rating}}
-          
-          </v-chip>
+             <v-card
+                class="mx-auto elevation-20"
+                 color="#F5F5F5"
+                  
+                style="max-width: 400px;"
+             >
+            <v-row justify="space-between">
+            <v-col cols="8">
+            <v-card-title>
+           <div>
+           
+            <div>{{Serie.name}}</div>
+           
+          </div>
+        </v-card-title>
+      </v-col>
+     
+        </v-row>
+        <v-divider dark></v-divider>
+            <v-card-actions class="pa-4">
+                {{$t('Rate this series')}}
+                <v-spacer></v-spacer>
+                <span color="#E0E0E0">
+                ({{ Serie.rating }})
+                </span>
+                <v-rating
+                v-model="Serie.rating"
+                background-color="white"
+                color="#FFD600"
+                dense
+                half-increments
+                hover
+                size="18"
+                ></v-rating>
+            </v-card-actions>
+            </v-card>
           </v-item>
         </v-col>
       </v-row>

@@ -44,7 +44,70 @@
     <v-divider
         vertical
     ></v-divider>
-     <v-icon v-if="IsConnect ==true" @click="AddSerie()">{{icon.mdiPlusBox}}</v-icon>
+     <v-menu
+        bottom
+        min-width="200px"
+        rounded
+        offset-y
+         v-if="IsConnect ==true"
+      >
+        <template v-slot:activator="{ on }">
+          <v-btn
+            icon
+            x-large
+            v-on="on"
+          >
+            <v-avatar
+              color="indigo lighten-1"
+              size="48"
+              dark
+            >
+              <span class="whith--text text-h5">{{ "TG" }}</span>
+            </v-avatar>
+          </v-btn>
+        </template>
+        <v-card>
+          <v-list-item-content class="justify-center">
+            <div class="mx-auto text-center">
+              <v-avatar
+                color="indigo"
+              >
+                <span class="white--text text-h5">{{ "TG" }}</span>
+              </v-avatar>
+              <h3>{{ "TG" }}</h3>
+              <p class="text-caption mt-1">
+                {{ "user.email" }}
+              </p>
+              <v-divider class="my-3"></v-divider>
+              <v-btn
+                depressed
+                rounded
+                text
+              >
+               {{$t('Edit Account')}}
+              </v-btn>
+              <v-divider class="my-3"></v-divider>
+              <v-btn
+                depressed
+                rounded
+                text
+                @click="AddSerie()"
+              >
+                {{$t('Add Series')}}
+              </v-btn>
+              <v-divider class="my-3"></v-divider>
+              <v-btn
+                depressed
+                rounded
+                text
+                @click="Disconnect()"
+              >
+                {{$t('Disconnect')}}
+              </v-btn>
+            </div>
+          </v-list-item-content>
+        </v-card>
+      </v-menu>
     
      <v-btn 
      @click="changeLangueEN()"
@@ -141,6 +204,7 @@ export default ({
       },
         StringRecherche:"",
          IsConnect:false,
+
          Series:[
              
              {
@@ -210,6 +274,9 @@ export default ({
               name:"AddSeries"
             })
 
+        },
+        Disconnect(){
+              this.IsConnect = false
         }
 
     },
