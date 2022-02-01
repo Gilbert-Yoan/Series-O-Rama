@@ -9,17 +9,18 @@
 
 --Suppression des tables pour repartir d'une base propre
 DROP TABLE NOTER CASCADE;
-DROP TABLE UTILISATEURS CASCADE;
-DROP TABLE SERIES CASCADE;
-DROP TABLE MOTS CASCADE;
+DROP TABLE UTILISATEUR CASCADE;
+DROP TABLE SERIE CASCADE;
+DROP TABLE MOT CASCADE;
 DROP TABLE CONTENIR CASCADE;
+DROP TABLE CHERCHER CASCADE;
 
-CREATE TABLE SERIES (
+CREATE TABLE SERIE (
     ids INT PRIMARY KEY,
     nomS VARCHAR(50)
 );
 
-CREATE TABLE UTILISATEURS (
+CREATE TABLE UTILISATEUR (
     idu SERIAL PRIMARY KEY,
     pseudo VARCHAR(30) UNIQUE,
     mail VARCHAR(50) UNIQUE,
@@ -32,11 +33,11 @@ CREATE TABLE Noter (
     idu INT,
     note REAL CHECK (note <= 5.0 AND note >=0),
     CONSTRAINT PK_NOTER PRIMARY KEY(ids, idu),
-    CONSTRAINT FK_NOTER_SERIES FOREIGN KEY(ids) REFERENCES SERIES(ids),
-    CONSTRAINT FK_NOTER_UTILISATEURS FOREIGN KEY(idu) REFERENCES UTILISATEURS(idu)
+    CONSTRAINT FK_NOTER_serie FOREIGN KEY(ids) REFERENCES serie(ids),
+    CONSTRAINT FK_NOTER_utilisateur FOREIGN KEY(idu) REFERENCES utilisateur(idu)
 );
 
-CREATE TABLE MOTS(
+CREATE TABLE mot(
     idm SERIAL PRIMARY KEY,
     mot VARCHAR(45) UNIQUE,
     langue VARCHAR(2),
@@ -48,24 +49,33 @@ CREATE TABLE CONTENIR(
     ids INT,
     occurence INT,
     CONSTRAINT PK_CONTENIR PRIMARY KEY (idm,ids),
-    CONSTRAINT FK_CONTENIR_SERIES FOREIGN KEY (ids) REFERENCES SERIES,
-    CONSTRAINT FK_CONTENIR_MOT FOREIGN KEY (idm) REFERENCES MOTS
+    CONSTRAINT FK_CONTENIR_serie FOREIGN KEY (ids) REFERENCES serie,
+    CONSTRAINT FK_CONTENIR_MOT FOREIGN KEY (idm) REFERENCES mot
+);
+
+CREATE TABLE CHERCHER(
+    idu INT,
+    idm INT,
+    temps TIMESTAMP default current_timestamp,
+    CONSTRAINT PK_CHERCHER PRIMARY KEY (idu,idm),
+    CONSTRAINT FK_CHERCHER_UTILISATEUR FOREIGN KEY (idu) REFERENCES utilisateur,
+    CONSTRAINT FK_CHERCHER_mot FOREIGN KEY (idm) REFERENCES mot
 );
 
 --Peuplement des tables
---Table SERIES
-INSERT INTO SERIES VALUES (1,'Série_Criminelle') ;
-INSERT INTO SERIES VALUES (2,'Série_Fantastique') ;
-INSERT INTO SERIES VALUES (3,'Série_Enfantine') ;
-INSERT INTO SERIES VALUES (4,'Série_Violente') ;
+--Table serie
+INSERT INTO serie VALUES (1,'Série_Criminelle') ;
+INSERT INTO serie VALUES (2,'Série_Fantastique') ;
+INSERT INTO serie VALUES (3,'Série_Enfantine') ;
+INSERT INTO serie VALUES (4,'Série_Violente') ;
 
---Table UTILISATEURS
-INSERT INTO UTILISATEURS(pseudo,mail,mdp,isAdmin) VALUES('User1','user@gmail.com','123',False) ;
-INSERT INTO UTILISATEURS(pseudo,mail,mdp,isAdmin) VALUES('User2','youser@gmail.com','123456',False) ;
-INSERT INTO UTILISATEURS(pseudo,mail,mdp,isAdmin) VALUES('Admin1','admin@gmail.com','passroot',True) ;
+--Table utilisateur
+INSERT INTO utilisateur(pseudo,mail,mdp,isAdmin) VALUES('User1','user@gmail.com','123',False) ;
+INSERT INTO utilisateur(pseudo,mail,mdp,isAdmin) VALUES('User2','youser@gmail.com','123456',False) ;
+INSERT INTO utilisateur(pseudo,mail,mdp,isAdmin) VALUES('Admin1','admin@gmail.com','passroot',True) ;
 
---Table Mots
-INSERT INTO Mots(mot,langue) VALUES ('Corps','FR'),('Monstre','FR'),('Sang','FR'),('Crime','FR'),('Police','FR'),
+--Table mot
+INSERT INTO mot(mot,langue) VALUES ('Corps','FR'),('Monstre','FR'),('Sang','FR'),('Crime','FR'),('Police','FR'),
     ('Pouvoirs','FR'),('Magicien','FR'),('Magie','FR'),('Dragon','FR'), --monstre en commun S1
     ('Princesse','FR'),('Prince','FR'),('Chateau','FR'), --magie & dragon commun avec S2
     ('Armes','FR'),('Meurtre','FR'),('Combat','FR') --sang et police en commun avec S1
@@ -81,21 +91,26 @@ INSERT INTO CONTENIR VALUES (1,1,260),(2,1,107),(3,1,201),(4,1,148),(5,1,315),
 
 
 --Table NOTER
---UTILISATEURS 1
-----Serie 1 est notee par l'UTILISATEURS 1 a 3 etoiles
+--utilisateur 1
+----Serie 1 est notee par l'utilisateur 1 a 3 etoiles
 INSERT INTO NOTER VALUES (1,1,3);
 INSERT INTO NOTER VALUES (2,1,2.6);
 INSERT INTO NOTER VALUES (4,1,4.5);
 
---UTILISATEURS 2
+--utilisateur 2
 INSERT INTO NOTER VALUES (1,2,4);
 INSERT INTO NOTER VALUES (2,2,3.5);
 INSERT INTO NOTER VALUES (3,2,4);
 
---UTILISATEURS 3
+--utilisateur 3
 INSERT INTO NOTER VALUES (2,3,4.5);
 INSERT INTO NOTER VALUES (3,3,3.2);
 INSERT INTO NOTER VALUES (4,3,2);
+
+--Table chercher
+----Ici l'insertion est un exemple, en aucun cas une réalité
+----Utilisateur 1 a cherché les mots avec les id 1,5,14
+INSERT INTO CHERCHER values (1,1), (1,5),(1,14),(2,7),(2,9);
 
 COMMIT;
 

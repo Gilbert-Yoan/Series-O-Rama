@@ -35,6 +35,19 @@ def recommander(connexion, user,serie):
     return(series) 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## connexion à la base locale PostGreSQL
 conn = pg.connect(
     host="localhost",
