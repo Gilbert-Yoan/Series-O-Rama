@@ -5,7 +5,7 @@
       dense
         dark
     ><!-- Bar color indigo-->
-      <v-toolbar-title>LBProd</v-toolbar-title>
+      <v-toolbar-title>LPProd</v-toolbar-title>
 
       <v-spacer></v-spacer>
       

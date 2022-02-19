@@ -5,7 +5,7 @@
       dense
         dark
     ><!-- Bar color indigo-->
-      <v-toolbar-title>LBProd</v-toolbar-title>
+      <v-toolbar-title>LPProd</v-toolbar-title>
 
       <v-spacer></v-spacer>
       <v-col>
@@ -71,8 +71,8 @@
     <v-container>
       <v-row >
         <v-col
-          v-for="Serie in Series"
-          :key="Serie.id"
+          v-for="Serie in series"
+          :key="Serie.noms"
           cols="12"
           md="4"
         >
@@ -88,7 +88,7 @@
             <v-card-title>
            <div>
            
-            <div>{{Serie.name}}</div>
+            <div>{{Serie.noms}}</div>
            
           </div>
         </v-card-title>
@@ -126,37 +126,16 @@
 
 <script>
 import LocaleLangue from "../i18n"
+import Api from "../Api";
 export default {
+    async created() {
+    this.series = await Api.GetAllSeries()
+    
+  },
     data :() => ({
      
          LoginDialog:false,
-         Series:[
-             
-             {
-                 id:1,
-                name: 'H',
-                rating: 3.4,
-
-             },
-             {
-                 id:2,
-                name: 'Lost',
-                rating: 4.6,
-
-             },
-             {
-                 id:4,
-                name: 'Walking Dead',
-                rating: 4.9,
-
-             },
-             {
-                 id:5,
-                name: 'Stranger Things',
-                rating: 5,
-
-             }
-         ]
+         series:[]
       }),
     methods: {
         changeLangueEN(){

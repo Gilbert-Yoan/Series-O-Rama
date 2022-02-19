@@ -5,7 +5,7 @@
       dense
         dark
     ><!-- Bar color indigo-->
-      <v-toolbar-title>LBProd</v-toolbar-title>
+      <v-toolbar-title>LPProd</v-toolbar-title>
 
       <v-spacer></v-spacer>
       <v-col>
@@ -140,8 +140,8 @@
     <v-container>
       <v-row >
         <v-col
-          v-for="Serie in Series"
-          :key="Serie.id"
+          v-for="Serie in series"
+          :key="Serie.noms"
           cols="12"
           md="4"
         >
@@ -157,7 +157,7 @@
             <v-card-title>
            <div>
            
-            <div>{{Serie.name}}</div>
+            <div>{{Serie.noms}}</div>
            
           </div>
         </v-card-title>
@@ -195,17 +195,23 @@
 
 import LocaleLangue from "../i18n" 
 import { mdiMagnify,mdiPlusBox  } from '@mdi/js';
+import  Api from "../Api"
 export default ({
-
+  
+  async created() {
+    this.series = await Api.GetAllSeries()
+    console.log(this.series);
+  },
   data :() => ({
       icon:{
         mdiMagnify,
         mdiPlusBox 
       },
+        series :[],
         StringRecherche:"",
          IsConnect:false,
 
-         Series:[
+         /*Series:[
              
              {
                  id:1,
@@ -231,9 +237,11 @@ export default ({
                 rating: 5,
 
              }
-         ]
+         ]*/
       })
   ,
+  
+  
           
     methods: {
         changeLangueEN(){
