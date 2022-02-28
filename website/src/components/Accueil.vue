@@ -62,7 +62,7 @@
               size="48"
               dark
             >
-              <span class="whith--text text-h5">{{ "TG" }}</span>
+              <span class="whith--text text-h5">{{ user[0].initial }}</span>
             </v-avatar>
           </v-btn>
         </template>
@@ -72,11 +72,12 @@
               <v-avatar
                 color="indigo"
               >
-                <span class="white--text text-h5">{{ "TG" }}</span>
+              
+                <span class="white--text text-h5">{{ user[0].initial }}</span>
               </v-avatar>
-              <h3>{{ "TG" }}</h3>
+              <h3>{{user[0].pseudo}}</h3>
               <p class="text-caption mt-1">
-                {{ "user.email" }}
+                {{ user[0].mail }}
               </p>
               <v-divider class="my-3"></v-divider>
               <v-btn
@@ -89,6 +90,7 @@
               <v-divider class="my-3"></v-divider>
               <v-btn
                 depressed
+                v-if="user[0].isadmin==true"
                 rounded
                 text
                 @click="AddSerie()"
@@ -187,14 +189,112 @@
       </v-row>
     </v-container>
   </v-item-group>
-  
+  <!-- pop Up create-->
+  <v-dialog
+      v-model="DialogCreateUser"
+      max-width="290"
+    >
+      <v-card>
+        <v-card-title class="text-h5">
+          
+        </v-card-title>
+
+        <v-card-text>
+          <v-text-field
+          v-model="LoginCreate"
+            :label="$t('Login:')"
+            :rules="[rules.required]"
+          ></v-text-field>
+          <v-text-field
+            v-model="email"
+            :rules="[rules.required, rules.email]"
+            label="E-mail"
+          ></v-text-field>
+          <v-text-field
+            v-model="passwordCreate"
+            :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+            :rules="[rules.required]"
+            :type="show1 ? 'text' : 'password'"
+            
+            :label="$t('Password')"
+            
+            counter
+            @click:append="show1 = !show1"
+          ></v-text-field>
+        
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+
+          <v-btn
+            color="green darken-1"
+            text
+            @click="CreateUser()"
+          >
+            {{$t('Create')}}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!-- pop Up Conection-->
+    <v-dialog
+      v-model="LoginDialog"
+      max-width="290"
+    >
+      <v-card>
+        <v-card-title class="text-h5">
+          {{$t('Login')}}
+        </v-card-title>
+
+        <v-card-text>
+          <v-text-field
+            :label="$t('Login:')"
+            v-model="loginConnect"
+          ></v-text-field>
+          <v-text-field
+            v-model="password"
+            :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+            :rules="[rules.required]"
+            :type="show1 ? 'text' : 'password'"
+            
+            :label="$t('Password')"
+            
+            counter
+            @click:append="show1 = !show1"
+          ></v-text-field>
+        
+        </v-card-text>
+
+        <v-card-actions>
+                <v-btn
+            color="green darken-1"
+            text
+            justify="center"
+          align="center"
+            @click="ConfirmLogin()"
+          >
+            {{$t('Login')}}
+          </v-btn>
+          
+        </v-card-actions>
+        <v-card-actions>
+          <v-col justify="center"
+                align="center">
+          <v-chip @click="DialogCreateUser = true"> {{$t('Create Account')}} </v-chip>
+          </v-col>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </div>
 </template>
+
 
 <script>
 
 import LocaleLangue from "../i18n" 
-import { mdiMagnify,mdiPlusBox  } from '@mdi/js';
+import { mdiMagnify,mdiPlusBox,mdiEye,mdiEyeOff    } from '@mdi/js';
 import  Api from "../Api"
 export default ({
   
@@ -205,39 +305,30 @@ export default ({
   data :() => ({
       icon:{
         mdiMagnify,
-        mdiPlusBox 
+        mdiPlusBox,
+        mdiEye ,
+        mdiEyeOff  
       },
         series :[],
+        loginConnect:"",
+        password:"",
+        user:[],
+        email:"",
+        LoginCreate:"",
         StringRecherche:"",
+        passwordCreate:"",
          IsConnect:false,
-
-         /*Series:[
-             
-             {
-                 id:1,
-                name: 'H',
-                rating: 3.4,
-
-             },
-             {
-                 id:2,
-                name: 'Lost',
-                rating: 4.6,
-
-             },
-             {
-                 id:4,
-                name: 'Walking Dead',
-                rating: 4.9,
-
-             },
-             {
-                 id:5,
-                name: 'Stranger Things',
-                rating: 5,
-
-             }
-         ]*/
+         LoginDialog :false,
+         DialogCreateUser:false,
+         show1:false,
+          rules: {
+          required: value => !!value || 'Required.',
+           email: value => {
+            const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            return pattern.test(value) || 'Invalid e-mail.'
+          },
+         }
+        
       })
   ,
   
@@ -253,7 +344,28 @@ export default ({
 
         },
         Login(){
-            this.IsConnect = true
+            this.LoginDialog = true
+        },
+        async ConfirmLogin(){
+            this.LoginDialog = false
+            if (this.loginConnect !=="" && this.password !=="") {
+              this.user = await Api.UserConnect(this.loginConnect,this.password)
+              let Initial = this.user[0].pseudo.split("")
+              Initial = Initial[0]+ Initial[1]
+              this.user[0].initial = Initial
+              console.log(this.user);
+              
+              this.IsConnect =true
+            }
+
+        },
+         async CreateUser(){
+          this.DialogCreateUser =false
+          if (this.LoginCreate !== "" && this.passwordCreate !== "" && this.email !=="") {
+            
+            await Api.CreateAccount(this.LoginCreate,this.passwordCreate,this.email)
+          }
+          
         },
         GoHome(){
             this.$router.push({

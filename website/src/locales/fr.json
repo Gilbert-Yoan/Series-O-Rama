@@ -11,5 +11,9 @@
     "Drop Files":"Deposer fichier ici",
     "Disconnect":"Se deconnecter",
     "Add Series":"Ajouter Series",
-    "Edit Account":"editer le compte"
+    "Edit Account":"editer le compte",
+    "Password":"Mot de passe",
+  "Login:":"Identifiant",
+  "Create Account":"Créé un compte",
+  "Create":"Créé"
 }

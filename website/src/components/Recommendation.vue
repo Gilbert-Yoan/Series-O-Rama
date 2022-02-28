@@ -118,7 +118,51 @@
       </v-row>
     </v-container>
   </v-item-group>
+    <v-dialog
+      v-model="dialog"
+      max-width="290"
+    >
+      <v-card>
+        <v-card-title class="text-h5">
+          
+        </v-card-title>
 
+        <v-card-text>
+          <v-text-field
+            label="Regular"
+          ></v-text-field>
+          <v-text-field
+            v-model="email"
+            :rules="[rules.required, rules.email]"
+            label="E-mail"
+          ></v-text-field>
+          <v-text-field
+            v-model="password"
+            :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+            :rules="[rules.required, rules.min]"
+            :type="show1 ? 'text' : 'password'"
+            name="input-10-1"
+            label="Normal with hint text"
+            hint="At least 8 characters"
+            counter
+            @click:append="show1 = !show1"
+          ></v-text-field>
+        
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+
+          <v-btn
+            color="green darken-1"
+            text
+            @click="dialog = false"
+          >
+            Agree
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
   </div>
   
@@ -135,7 +179,14 @@ export default {
     data :() => ({
      
          LoginDialog:false,
-         series:[]
+         series:[],
+         rules: {
+          required: value => !!value || 'Required.',
+           email: value => {
+            const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            return pattern.test(value) || 'Invalid e-mail.'
+          },
+         }
       }),
     methods: {
         changeLangueEN(){
