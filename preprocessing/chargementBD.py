@@ -2,7 +2,7 @@ import nltk
 import os
 import psycopg2
 from nltk.corpus import stopwords
-stopwords.words('french')
+
 
 #https://towardsdatascience.com/natural-language-processing-feature-engineering-using-tf-idf-e8b9d00e7e76
 def computeTF(wordDict, bagOfWords):
@@ -65,12 +65,13 @@ dict_tfidf = computeTFIDF(documents,dict_idf)
 print(dict_tfidf)
 """
 
+"""
 from sklearn.feature_extraction.text import TfidfVectorizer,CountVectorizer
 import pandas as pd
 import os
 from os import listdir
 from os.path import isfile, join
-mypath = "C:\\cygwin64\\home\\djyoy\\st\\24"
+mypath = "D:\\LP\\ProjetLP\\24"
 onlyfiles = [join(mypath,f) for f in listdir(mypath) if isfile(join(mypath, f))]
 documents = [ open(file).read()  for file in onlyfiles ]
 #documents = ["je m'appelle Yoan et j'aime ça","Je m'appelle Pauline et j'aime ça","J'adore les avions","J'apprécie Pauline","je m'appelle j'adore les abricots et je suis bien","j'adore les avions je suis libre"]
@@ -84,3 +85,61 @@ df = pd.DataFrame(tfidf_matrix.toarray(), columns = vect.get_feature_names_out()
 print(df)
 for file in documents:
     os.close(file)
+"""
+
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+#Récupération du nom de toutes les entrées contenues dans le dossier sous-titres (ici on va tester avec un dossier plus petit)
+chemin_dossier = 'D:\\LP\\ProjetLP\\sr_test'
+noms_series = os.listdir(chemin_dossier)
+
+
+#Pour chaque série on va
+for serie in noms_series :
+    #Ouvrir le dossier correspondant
+    with os.scandir(chemin_dossier+'\\'+serie) as liste_st :
+        #Créer une liste qui va contenir l'ensemble des phrases de la série
+        dataset = []
+        #Pour chaque fichier de sous-titre
+        for fichier in liste_st:
+            #ouvrir le ficher
+            fileObj = open(chemin_dossier+'\\'+serie+'\\'+fichier.name, "r")
+            #stocker les phrases dans un array temporaire (penser à enlever les indications pour placer les sous-titres)
+            phrases_fichier = fileObj.read().splitlines()
+            #fermer le fichier
+            fileObj.close()
+            #Supprimer les mots de liaison de la phrase grâce à stopwords
+            #Ajouter la phrase dans la liste contenant toutes les phrases de la série
+        #Calcul du TF-IDF   
+        #Calcul de l'occurence des mots qui selon le TD-IDF sont pertinents pour décrire la série
+        #Charger dans la BDD pour cette série l'occurence des mots
+    print("fin serie")
+print("fin traitement")
+
+
+
+            
+    
+
+
+
+"""
+#Récupération des mots de liaison en fonction de la langue 
+liaison_mots= stopwords.words('english')
+
+#Définition du dataset
+dataset = [
+    "I enjoy reading about Machine Learning and Machine Learning is my PhD subject",
+    "I would enjoy a walk in the park",
+    "I was reading in the library"
+]
+#TF-IDF 
+tfIdfVectorizer=TfidfVectorizer(use_idf=True)
+tfIdf = tfIdfVectorizer.fit_transform(dataset)
+df = pd.DataFrame(tfIdf[0].T.todense(), index=tfIdfVectorizer.get_feature_names_out(), columns=["TF-IDF"])
+df = df.sort_values('TF-IDF', ascending=False)
+print (df.head(25))
+"""
+
+
