@@ -43,7 +43,6 @@ const UserConnect =(request,responce)=>{
             if (error) {
                 throw error
             }
-            console.log(result.rows);
             responce.status(200).json(result.rows);
         }
     )
@@ -65,10 +64,26 @@ const CreateAccount =(request,responce)=>{
             }
         )
         }
+const REcherche =(request,responce)=>{
+   
+const string = request.body.String
+ 
+    config.query("SELECT s.*, COUNT(s.ids), SUM(c.occurence) FROM SERIE s, CONTENIR c, MOT m WHERE s.ids = c.ids AND m.idm = c.idm AND m.mot IN "+string +" GROUP BY s.ids ORDER BY COUNT(s.ids) DESC,SUM(c.occurence) DESC; ",
+                (error,result)=>{
+            
+                    if (error) {
+                        throw error
+                    }
+                    console.log(result.rows);
+                    responce.status(200).json(result.rows);
+                }
+            )
+            }
 
 module.exports ={
 
 AllSeries,
 UserConnect,
-CreateAccount
+CreateAccount,
+REcherche
 }

@@ -70,6 +70,29 @@ static CreateAccount(Login , Password,email){
     });
 
 }
+static REcherche(String){
+
+    return new Promise((resolve,reject)=>{
+
+        axios.post("api/REcherche",{
+            String:String
+            
+
+        })
+        .then((res)=>{
+
+            const data = res.data;
+            resolve(data)
+        })
+        .catch((err)=>{
+            reject(err)
+        
+        
+        });
+
+    });
+
+}
 
 
 }//classe

@@ -388,6 +388,11 @@ export default ({
         StringFinal = StringFinal.substring(StringFinal.length-1,0);
         StringFinal = StringFinal +")"
         console.log(StringFinal)
+        this.Recherche(StringFinal)
+        },
+        async Recherche(String){
+          this.series = await Api.REcherche(String)
+         
         },
         AddSerie(){
             this.$router.push({
