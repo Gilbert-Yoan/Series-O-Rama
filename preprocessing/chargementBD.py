@@ -2,7 +2,13 @@ import nltk
 import os
 import psycopg2
 from nltk.corpus import stopwords
+import re
+import string 
+stopwords.words('english') #a modifier dynamiquement en fonction de la langue du fichier
 
+
+
+#Début déclaration méthodes
 
 #https://towardsdatascience.com/natural-language-processing-feature-engineering-using-tf-idf-e8b9d00e7e76
 def computeTF(wordDict, bagOfWords):
@@ -33,6 +39,65 @@ def computeTFIDF(TF, IDF):
         tfidf[word] = val * IDF[word]
     return tfidf
 
+
+def tester_pattern(pattern, string_test):
+    results = re.search(pattern, string_test)
+    if results is None:
+        return True #pas de match (ne correspond pas au pattern)
+    else:
+        return False #match
+
+
+# IN  : Un array contenant l'ensemble des phrases d'un fichier de sous-titres pour une série
+# OUT : Un array contenant l'ensemble des phrases d'un fichier de sous-titres pour une série sans la ponctuation  
+def traitement_ponctuation(fichier_phrases) :
+    phrases_temp = []
+    for phrase in fichier_phrases:
+        phrases_temp.append(re.sub("[^\w\s']", ' ',phrase))
+    return phrases_temp
+
+
+# IN  : 
+# OUT :
+def traitement_stop_words(fichier_phrases) :
+    return fichier_phrases
+
+
+
+
+#IN  : Un array contenant l'ensemble des phrases d'un fichier de sous-titres pour une série, le nom du fichier en cours de traitement avec l'extension
+#OUT : Un array contenant l'ensemble des phrases d'un fichier de sous-titres pour une série
+def nettoyage_fichier_st (fichier_phrases,nom_fichier):
+    #A faire
+        #Voir pour l'utilisation de stopwords
+    fichier_phrases_temp=[]
+    fichier_propre=[]
+
+    #Supprimer les phrases ne contenant que des espaces
+    fichier_phrases=[phrase for phrase in fichier_phrases if phrase]
+
+    #Supprimer les indications de placement des sous-titres (pour un fichier srt ou sub)
+    if os.path.splitext(nom_fichier)[1]==".srt" :  
+        pattern = "^.+-->.+$"
+        pattern2 = "^[0-9]+$"
+
+        fichier_phrases_temp=[phrase for phrase in fichier_phrases if tester_pattern(pattern, phrase)]
+        fichier_phrases_temp=[phrase for phrase in fichier_phrases_temp if tester_pattern(pattern2, phrase)]
+
+    elif os.path.splitext(nom_fichier)[1]==".sub" :
+        for phrase in fichier_phrases : 
+            fichier_phrases_temp.append(re.sub('^{[0-9]+}{[0-9]+}', '', phrase))
+
+    fichier_phrases_temp = traitement_ponctuation(fichier_phrases_temp)
+    #fichier_phrases_temp = traitement_stop_words(fichier_phrases_temp)
+
+    fichier_propre = fichier_phrases_temp
+
+    return fichier_propre 
+
+
+
+#Fin déclaration méthodes 
 '''
 documents = []
 for rep in st:
@@ -91,55 +156,46 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 #Récupération du nom de toutes les entrées contenues dans le dossier sous-titres (ici on va tester avec un dossier plus petit)
-chemin_dossier = 'D:\\LP\\ProjetLP\\sr_test'
+chemin_dossier = 'D:\\LP\\ProjetLP\\sous-titres'
 noms_series = os.listdir(chemin_dossier)
-
+nb_series = 0
 
 #Pour chaque série on va
 for serie in noms_series :
+    nb_series = nb_series +1
     #Ouvrir le dossier correspondant
-    with os.scandir(chemin_dossier+'\\'+serie) as liste_st :
-        #Créer une liste qui va contenir l'ensemble des phrases de la série
+    with os.scandir(chemin_dossier+'\\'+serie) as liste_fichiers_st :
+        #Créer une liste qui va pour une serie, contenir pour chaque fichier de st les phrases nettoyés [['phrase1,phrase2'],['phrase1,phrase2']] (1 dataset par série)
         dataset = []
         #Pour chaque fichier de sous-titre
-        for fichier in liste_st:
+        for fichier in liste_fichiers_st:
             #ouvrir le ficher
-            fileObj = open(chemin_dossier+'\\'+serie+'\\'+fichier.name, "r")
-            #stocker les phrases dans un array temporaire (penser à enlever les indications pour placer les sous-titres)
-            phrases_fichier = fileObj.read().splitlines()
+            fileObj = open(chemin_dossier+'\\'+serie+'\\'+fichier.name, "r",encoding='latin-1')
+            #stocker les phrases dans un array temporaire
+            fichier_phrases = fileObj.read().splitlines()
             #fermer le fichier
             fileObj.close()
-            #Supprimer les mots de liaison de la phrase grâce à stopwords
-            #Ajouter la phrase dans la liste contenant toutes les phrases de la série
-        #Calcul du TF-IDF   
+
+            #Nettoyer les phrases récupérées du fichier de sous-titre en fonction du type de fichier (srt ou sub) et ajout du fichier au dataset
+            fichier_ok = nettoyage_fichier_st(fichier_phrases,fichier.name)
+            dataset.append(fichier_ok)
+
+
+            #Affichage pour vérifier le résultat de chaque fichier (1 fichier = 1 array)
+            #print(fichier.name)
+            print("---------------------")
+            print(fichier_ok)
+            print("---------------------")
+
+    print(len(dataset))
+    print("Fin serie : "+serie)
+    #print(dataset)
+    print("---------------------")
+    #Calcul du TF-IDF sur le dataset 
         #Calcul de l'occurence des mots qui selon le TD-IDF sont pertinents pour décrire la série
-        #Charger dans la BDD pour cette série l'occurence des mots
-    print("fin serie")
+        #Chargement dans la BDD
+            #Table Serie
+            #Table Mot
+            #Table Contenir
 print("fin traitement")
-
-
-
-            
-    
-
-
-
-"""
-#Récupération des mots de liaison en fonction de la langue 
-liaison_mots= stopwords.words('english')
-
-#Définition du dataset
-dataset = [
-    "I enjoy reading about Machine Learning and Machine Learning is my PhD subject",
-    "I would enjoy a walk in the park",
-    "I was reading in the library"
-]
-#TF-IDF 
-tfIdfVectorizer=TfidfVectorizer(use_idf=True)
-tfIdf = tfIdfVectorizer.fit_transform(dataset)
-df = pd.DataFrame(tfIdf[0].T.todense(), index=tfIdfVectorizer.get_feature_names_out(), columns=["TF-IDF"])
-df = df.sort_values('TF-IDF', ascending=False)
-print (df.head(25))
-"""
-
-
+print(nb_series)
