@@ -1,0 +1,19 @@
+Présence de fichiers texte (criminalminds,howimetyourmother)
+
+Présence de fichiers avec une extension en ASS (desperatehousewives)
+
+Présence de fichiers RAR (entourage,sexandthecity)
+
+Présence de fichiers sous-titres avec une extension en .VO mais il s'agit d'un format SRT (mynameisearl)
+
+Présence de fichier n'étant ni des sous-titres ni des fichiers texte
+->VBScript (entourage)
+-> Fichier d'informations système .nfo (sixfeetunder,theshield)
+
+A noter que certains fichiers de sous-titres sont vides (traitement dans le script chargementBDD.py)
+
+
+
+
+
+
