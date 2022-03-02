@@ -96,24 +96,19 @@ def traitement_stop_words(fichier_phrases) :
     fichier_phrases_temp = []
     #Suppression des mots de liaison
     for phrase in fichier_phrases :
-        print(phrase)
         temp_phrase = [mot for mot in phrase.lower().split() if mot not in liste_stop_w]
-        print(temp_phrase)      
         #Re-création de la phrase en une chaine
         temp_phrase = ' '.join(temp_phrase)
         #Ajout au tableau
         fichier_phrases_temp.append(temp_phrase)
 
-    print(fichier_phrases_temp)
-    print("------------------")
     return fichier_phrases_temp
 
 
 #IN  : Un array contenant l'ensemble des phrases d'un fichier de sous-titres pour une série, le nom du fichier en cours de traitement avec l'extension
 #OUT : Un array contenant l'ensemble des phrases d'un fichier de sous-titres pour une série
 def nettoyage_fichier_st (fichier_phrases,nom_fichier):
-    #A faire
-        #Voir pour l'utilisation de stopwords
+
     fichier_phrases_temp=[]
     fichier_propre=[]
 
@@ -214,7 +209,7 @@ for serie in noms_series :
         #Pour chaque fichier de sous-titre
         for fichier in liste_fichiers_st:
             #ouvrir le ficher
-            fileObj = open(chemin_dossier+'\\'+serie+'\\'+fichier.name, "r",encoding='latin-1')
+            fileObj = open(chemin_dossier+'\\'+serie+'\\'+fichier.name, "r",encoding='ansi')
             #stocker les phrases dans un array temporaire
             fichier_phrases = fileObj.read().splitlines()
             #fermer le fichier
@@ -225,12 +220,11 @@ for serie in noms_series :
                 fichier_ok = nettoyage_fichier_st(fichier_phrases,fichier.name)
                 dataset.append(fichier_ok)
                 #Affichage pour vérifier le résultat de chaque fichier (1 fichier = 1 array)
-                #print("---------------------")
-                #print(fichier_ok)
-                #print("---------------------")
+                print(fichier_ok)
+                print("---------------------")
             
-    #print(len(dataset))
-    #print("Fin serie : "+serie)
+    print(len(dataset))
+    print("Fin serie : "+serie)
     #print(dataset)
     
     #Calcul du TF-IDF sur le dataset 
@@ -239,5 +233,5 @@ for serie in noms_series :
             #Table Serie
             #Table Mot
             #Table Contenir
-#print("fin traitement")
-#print(nb_series)
+print("fin traitement")
+print(nb_series)
