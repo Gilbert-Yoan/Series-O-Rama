@@ -6,10 +6,11 @@ from nltk.corpus import stopwords
 import re
 import string 
 import langid # pip install langid==1.1.6
-
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer,CountVectorizer
 
 #Début déclaration méthodes
-
+"""
 #https://towardsdatascience.com/natural-language-processing-feature-engineering-using-tf-idf-e8b9d00e7e76
 def computeTF(wordDict, bagOfWords):
     tfDict = {}
@@ -38,7 +39,7 @@ def computeTFIDF(TF, IDF):
     for word, val in TF.items():
         tfidf[word] = val * IDF[word]
     return tfidf
-
+"""
 
 def tester_pattern(pattern, string_test):
     results = re.search(pattern, string_test)
@@ -86,7 +87,7 @@ def definition_langue_fichier(fichier_phrases):
 
 
 # IN  : Un array contenant l'ensemble des phrases d'un fichier de sous-titres pour une série avec des phrases sans indications de sous-titres et de ponctuation
-# OUT : Un array contenant l'ensemble des phrases d'un fichier de sous-titres pour une série sans les mots de liaison
+# OUT : Un array contenant l'ensemble des phrases d'un fichier de sous-titres pour une série sans les mots de liaison, la langue du fichier de sous-titres
 def traitement_stop_words(fichier_phrases) :
 
     #Détection de la langue du fichier de sous-titres que l'on traite
@@ -94,19 +95,24 @@ def traitement_stop_words(fichier_phrases) :
     liste_stop_w = stopwords.words(langue)
    
     fichier_phrases_temp = []
+    infos_fichier = []
     #Suppression des mots de liaison
     for phrase in fichier_phrases :
         temp_phrase = [mot for mot in phrase.lower().split() if mot not in liste_stop_w]
         #Re-création de la phrase en une chaine
         temp_phrase = ' '.join(temp_phrase)
-        #Ajout au tableau
-        fichier_phrases_temp.append(temp_phrase)
+        #Ajout au tableau si la phrase n'est pas vide
+        if len(temp_phrase)>0 : 
+            fichier_phrases_temp.append(temp_phrase)
 
-    return fichier_phrases_temp
+    infos_fichier.append(fichier_phrases_temp)
+    infos_fichier.append(langue)
+
+    return infos_fichier
 
 
 #IN  : Un array contenant l'ensemble des phrases d'un fichier de sous-titres pour une série, le nom du fichier en cours de traitement avec l'extension
-#OUT : Un array contenant l'ensemble des phrases d'un fichier de sous-titres pour une série
+#OUT : Un array contenant l'ensemble des phrases d'un fichier de sous-titres pour une série et la langue du fichier
 def nettoyage_fichier_st (fichier_phrases,nom_fichier):
 
     fichier_phrases_temp=[]
@@ -191,9 +197,6 @@ for file in documents:
     os.close(file)
 """
 
-import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-
 #Récupération du nom de toutes les entrées contenues dans le dossier sous-titres (ici on va tester avec un dossier plus petit)
 chemin_dossier = 'D:\\LP\\ProjetLP\\sr_test'
 noms_series = os.listdir(chemin_dossier)
@@ -204,34 +207,69 @@ for serie in noms_series :
     nb_series = nb_series +1
     #Ouvrir le dossier correspondant
     with os.scandir(chemin_dossier+'\\'+serie) as liste_fichiers_st :
-        #Créer une liste qui va pour une serie, contenir pour chaque fichier de st les phrases nettoyés [['phrase1,phrase2'],['phrase1,phrase2']] (1 dataset par série)
+        #Créer deux dataset (un pour chaque langue), chacun de ses dataset contenant des chaines de caractères (chaque chaine représentant un fichier de sous-titres)
+        dataset_vf = []
+        dataset_vo = []
         dataset = []
         #Pour chaque fichier de sous-titre
         for fichier in liste_fichiers_st:
             #ouvrir le ficher
-            fileObj = open(chemin_dossier+'\\'+serie+'\\'+fichier.name, "r",encoding='ansi')
+            fileObj = open(chemin_dossier+'\\'+serie+'\\'+fichier.name, "r",encoding='latin-1')
             #stocker les phrases dans un array temporaire
             fichier_phrases = fileObj.read().splitlines()
             #fermer le fichier
             fileObj.close()
 
-            #Nettoyer les phrases récupérées du fichier de sous-titre (si il n'est pas vide) en fonction du type de fichier (srt ou sub) et ajout du fichier au dataset
+            #Nettoyer les phrases récupérées du fichier de sous-titre (si il n'est pas vide) en fonction du type de fichier (srt ou sub) et ajout du fichier au dataset correspondant
             if len(fichier_phrases) !=0 :
                 fichier_ok = nettoyage_fichier_st(fichier_phrases,fichier.name)
-                dataset.append(fichier_ok)
-                #Affichage pour vérifier le résultat de chaque fichier (1 fichier = 1 array)
-                print(fichier_ok)
-                print("---------------------")
-            
-    print(len(dataset))
+                if fichier_ok[1]=="english":
+                    dataset_vo.append(' '.join(fichier_ok[0]))
+                else : 
+                    dataset_vf.append(' '.join(fichier_ok[0]))
+
     print("Fin serie : "+serie)
-    #print(dataset)
+    dataset
     
-    #Calcul du TF-IDF sur le dataset 
+    #Calcul du TF-IDF sur les deux dataset
+    dataset.append(dataset_vf)
+    dataset.append(dataset_vo)
+    for data in dataset :
+        tfIdfVectorizer=TfidfVectorizer(use_idf=True)
+        tfIdf = tfIdfVectorizer.fit_transform(data)
+        df = pd.DataFrame(tfIdf[0].T.todense(), index=tfIdfVectorizer.get_feature_names_out(), columns=["TF-IDF"])
+        df = df.sort_values('TF-IDF', ascending=False)
+        print (df.head(25)) 
+        for index, row in df.iterrows():
+            print(row)
+        
         #Calcul de l'occurence des mots qui selon le TD-IDF sont pertinents pour décrire la série
         #Chargement dans la BDD
             #Table Serie
             #Table Mot
             #Table Contenir
+
 print("fin traitement")
-print(nb_series)
+print(nb_series) 
+
+
+
+
+#Notes sur le TF-IDF
+#TF
+    #FORMULE
+        #Nombre de fois qu'un document apparait dans le document d / nombre totale de mots dans le doucment d
+    #REMARQUES
+        #Pour chaque mot on va calculer un TF par fichier de sous-titres
+
+#IDF
+    #FORMULE
+        #log(nombre de fichiers de sous-titres pour une série/nombre de fichiers de sous-titres qui contiennent le mot X)
+    #REMARQUES
+        # Pour chaque mot on va calculer un IDF
+
+#TFIDF
+    #FORMULE
+        #TF*IDF
+    #REMARQUES
+        #A la fin on aura autant de TFIDF que de TF (cf schéma)
