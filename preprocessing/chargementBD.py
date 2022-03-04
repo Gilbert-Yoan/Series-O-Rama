@@ -202,28 +202,15 @@ chemin_dossier = 'D:\\LP\\ProjetLP\\sr_test'
 noms_series = os.listdir(chemin_dossier)
 nb_series = 0
 
-#Créer deux dataset (un pour chaque langue), chacun de ses dataset contenant des chaines de caractères (chaque chaine représentant une série)
-dataset_vf = {}
-dataset_vo = {}
-
-#Créer un dataset qui contient un dataset pour l'angais et un autre pour le françcais 
-dataset = []
-
 #Pour chaque série on va
 for serie in noms_series :
     nb_series = nb_series +1
-    #Créer les dataset temporaires pour une série pour permettre l'ajout plus tard dans les dataset définitfs
-    dataset_vo_temp = []
-    dataset_vf_temp = []
-
-    #Créer l'entrée pour la série dans les deux dictionaires
-    if serie not in dataset_vf.keys() : 
-        dataset_vf[serie] = ""
-    if serie not in dataset_vo.keys() :
-        dataset_vo[serie] = ""
-    
     #Ouvrir le dossier correspondant
     with os.scandir(chemin_dossier+'\\'+serie) as liste_fichiers_st :
+        #Créer deux dataset (un pour chaque langue), chacun de ses dataset contenant des chaines de caractères (chaque chaine représentant un fichier de sous-titres)
+        dataset_vf = []
+        dataset_vo = []
+        dataset = []
         #Pour chaque fichier de sous-titre
         for fichier in liste_fichiers_st:
             #ouvrir le ficher
@@ -233,53 +220,37 @@ for serie in noms_series :
             #fermer le fichier
             fileObj.close()
 
-            #Nettoyer les phrases récupérées du fichier de sous-titre (si il n'est pas vide) en fonction du type de fichier (srt ou sub) et ajout du fichier dans un dataset temporaire
+            #Nettoyer les phrases récupérées du fichier de sous-titre (si il n'est pas vide) en fonction du type de fichier (srt ou sub) et ajout du fichier au dataset correspondant
             if len(fichier_phrases) !=0 :
                 fichier_ok = nettoyage_fichier_st(fichier_phrases,fichier.name)
                 if fichier_ok[1]=="english":
-                    dataset_vo_temp.append(' '.join(fichier_ok[0]))
+                    dataset_vo.append(' '.join(fichier_ok[0]))
                 else : 
-                    dataset_vf_temp.append(' '.join(fichier_ok[0]))
-    
-    # Rajout de la serie au dataset correspondant
-    dataset_vf[serie] = ' '.join(dataset_vf_temp)
-    dataset_vo[serie] = ' '.join(dataset_vo_temp)
+                    dataset_vf.append(' '.join(fichier_ok[0]))
+
     print("Fin serie : "+serie)
-
-
-#Calcul du TF-IDF sur les deux dataset
-dataset.append(dataset_vf)
-dataset.append(dataset_vo)
-
-
-for data in dataset :
-
-    #Mise en place de la liste cotenant l'ensemble des chaines représentant les séries
-    values_dict = list(data.values())
-
-    keys_dict = list(data.keys()) 
-
-    # instantiate the vectorizer object
-    tfidfvectorizer = TfidfVectorizer(analyzer='word')
-
-    # convert th documents into a matrix
-    tfidf_wm = tfidfvectorizer.fit_transform(values_dict)
-
-    #retrieve the terms found in the corpora
-    tfidf_tokens = tfidfvectorizer.get_feature_names_out()
+    dataset
     
-    df_tfidfvect = pd.DataFrame(data = tfidf_wm.toarray(),index =keys_dict ,columns = tfidf_tokens)
-    #df_tfidfvect.sort_values(ascending=False)
-    print(df_tfidfvect.to_string())
-   
-#Calcul de l'occurence des mots qui selon le TD-IDF sont pertinents pour décrire la série
-#Chargement dans la BDD
-#Table Serie
-# #Table Mot
-#Table Contenir
+    #Calcul du TF-IDF sur les deux dataset
+    dataset.append(dataset_vf)
+    dataset.append(dataset_vo)
+    for data in dataset :
+        tfIdfVectorizer=TfidfVectorizer(use_idf=True)
+        tfIdf = tfIdfVectorizer.fit_transform(data)
+        df = pd.DataFrame(tfIdf[0].T.todense(), index=tfIdfVectorizer.get_feature_names_out(), columns=["TF-IDF"])
+        df = df.sort_values('TF-IDF', ascending=False)
+        print (df.head(50)) 
+        for index, row in df.iterrows():
+            print(row)
+        
+        #Calcul de l'occurence des mots qui selon le TD-IDF sont pertinents pour décrire la série
+        #Chargement dans la BDD
+            #Table Serie
+            #Table Mot
+            #Table Contenir
 
 print("fin traitement")
-
+print(nb_series) 
 
 
 
@@ -287,13 +258,13 @@ print("fin traitement")
 #Notes sur le TF-IDF
 #TF
     #FORMULE
-        #Nombre de fois qu'un mot apparait dans le document d / nombre totale de mots dans le doucment d
+        #Nombre de fois qu'un document apparait dans le document d / nombre totale de mots dans le doucment d
     #REMARQUES
         #Pour chaque mot on va calculer un TF par fichier de sous-titres
 
 #IDF
     #FORMULE
-        #log(nombre de series/nombre de serie qui contiennent le mot X)
+        #log(nombre de fichiers de sous-titres pour une série/nombre de fichiers de sous-titres qui contiennent le mot X)
     #REMARQUES
         # Pour chaque mot on va calculer un IDF
 
