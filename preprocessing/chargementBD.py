@@ -93,12 +93,13 @@ def traitement_stop_words(fichier_phrases) :
     #Détection de la langue du fichier de sous-titres que l'on traite
     langue  = definition_langue_fichier(fichier_phrases)
     liste_stop_w = stopwords.words(langue)
-   
+    print("TEST")
+    print(liste_stop_w)
     fichier_phrases_temp = []
     infos_fichier = []
     #Suppression des mots de liaison
     for phrase in fichier_phrases :
-        temp_phrase = [mot for mot in phrase.lower().split() if mot not in liste_stop_w]
+        temp_phrase = [mot for mot in phrase.lower().split() if mot not in liste_stop_w] #a revoir avec une autre liste et vérifier la supression
         #Re-création de la phrase en une chaine
         temp_phrase = ' '.join(temp_phrase)
         #Ajout au tableau si la phrase n'est pas vide
@@ -231,7 +232,7 @@ for serie in noms_series :
     print("Fin serie : "+serie)
     dataset
     
-    #Calcul du TF-IDF sur les deux dataset
+    #Calcul du TF-IDF sur les deux dataset (vérifier avant l'ajout si le dataset existe)
     dataset.append(dataset_vf)
     dataset.append(dataset_vo)
     for data in dataset :
@@ -240,8 +241,8 @@ for serie in noms_series :
         df = pd.DataFrame(tfIdf[0].T.todense(), index=tfIdfVectorizer.get_feature_names_out(), columns=["TF-IDF"])
         df = df.sort_values('TF-IDF', ascending=False)
         print (df.head(50)) 
-        for index, row in df.iterrows():
-            print(row)
+        #for index, row in df.iterrows():
+            #print(row)
         
         #Calcul de l'occurence des mots qui selon le TD-IDF sont pertinents pour décrire la série
         #Chargement dans la BDD
