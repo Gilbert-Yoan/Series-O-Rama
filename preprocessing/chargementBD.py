@@ -56,6 +56,7 @@ def traitement_ponctuation(fichier_phrases) :
     for phrase in fichier_phrases:
         #Suppression de la ponctuation
         tem_p = re.sub("[^\w\s']", ' ',phrase)
+        tem_p = re.sub("[.*']",' ',tem_p)
         #Suppression des espaces en trop
         phrases_temp.append(re.sub('\s+', ' ', tem_p))
     return phrases_temp
@@ -92,9 +93,16 @@ def traitement_stop_words(fichier_phrases) :
 
     #Détection de la langue du fichier de sous-titres que l'on traite
     langue  = definition_langue_fichier(fichier_phrases)
-    liste_stop_w = stopwords.words(langue)
-    print("TEST")
-    print(liste_stop_w)
+
+    if langue=="french" : 
+        fileObj = open("D:/LP/ProjetLP/Series-O-Rama/preprocessing/notes_Pauline _ChargementBDD/StopwFrench.txt", "r")
+        #stocker les phrases dans un array temporaire
+        stop_w_french = fileObj.read().splitlines()
+        liste_stop_w = stop_w_french
+        print(liste_stop_w)
+    else : 
+        liste_stop_w = stopwords.words(langue)
+
     fichier_phrases_temp = []
     infos_fichier = []
     #Suppression des mots de liaison
@@ -236,13 +244,21 @@ for serie in noms_series :
     dataset.append(dataset_vf)
     dataset.append(dataset_vo)
     for data in dataset :
+        print(data)
+        countvectorizer = CountVectorizer()
+        count_wm = countvectorizer.fit_transform(data)
+        df_c = pd.DataFrame(count_wm[0].T.todense(), index=countvectorizer.get_feature_names_out(), columns=["COUNT"])
+        df_c = df_c.sort_values('COUNT', ascending=False)
+        print (df_c.head(50)) 
+
+
         tfIdfVectorizer=TfidfVectorizer(use_idf=True)
         tfIdf = tfIdfVectorizer.fit_transform(data)
         df = pd.DataFrame(tfIdf[0].T.todense(), index=tfIdfVectorizer.get_feature_names_out(), columns=["TF-IDF"])
         df = df.sort_values('TF-IDF', ascending=False)
         print (df.head(50)) 
-        #for index, row in df.iterrows():
-            #print(row)
+        for index, row in df.iterrows():
+            print(row)
         
         #Calcul de l'occurence des mots qui selon le TD-IDF sont pertinents pour décrire la série
         #Chargement dans la BDD
