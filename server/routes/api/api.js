@@ -7,6 +7,6 @@ router.post('/AllSeries',db.AllSeries)
 router.post('/UserConnect',db.UserConnect)
 router.post('/CreateAccount',db.CreateAccount)
 router.post('/REcherche',db.REcherche)
-
+router.post('/GETRecoRAND',db.GETRecoRAND)
 
 module.exports = router;

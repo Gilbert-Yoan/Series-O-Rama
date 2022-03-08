@@ -93,7 +93,25 @@ static REcherche(String){
     });
 
 }
+static GetRecoRAND(){
 
+        return new Promise((resolve,reject)=>{
+
+            axios.post("api/GETRecoRAND")
+                .then((res)=>{
+
+                    const data = res.data;
+                    resolve(data)
+                })
+                .catch((err)=>{
+                    reject(err)
+
+
+                });
+
+        });
+
+    }
 
 }//classe
 

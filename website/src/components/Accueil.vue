@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- Bar d'application -->
     <v-app-bar
       color="#3F51B5"
       dense
@@ -58,7 +59,7 @@
             v-on="on"
           >
             <v-avatar
-              color="indigo lighten-1"
+              color="#3F51B5"
               size="48"
               dark
             >
@@ -70,7 +71,7 @@
           <v-list-item-content class="justify-center">
             <div class="mx-auto text-center">
               <v-avatar
-                color="indigo"
+                color="#3F51B5"
               >
               
                 <span class="white--text text-h5">{{ user[0].initial }}</span>
@@ -132,12 +133,14 @@
     </v-btn>
      
     </v-app-bar>
+    <!-- Carte texte -->
    <v-card>
   <template>
       <v-card-title>{{$t('Our Series')}}</v-card-title>
   </template>
    </v-card>
    <br>
+    <!--Listed des series-->
    <v-item-group>
     <v-container>
       <v-row >
@@ -175,7 +178,7 @@
                 </span>
                 <v-rating
                 v-model="Serie.rating"
-                background-color="white"
+                background-color="#FFEA00"
                 color="#FFD600"
                 dense
                 half-increments
@@ -299,8 +302,16 @@ import  Api from "../Api"
 export default ({
   
   async created() {
+    var user = sessionStorage.getItem("User")
+  
+    if (user !== null && user !== "[]"){
+      this.user = JSON.parse(user)
+      this.IsConnect = true
+    }else{
+      this.IsConnect = false
+    }
     this.series = await Api.GetAllSeries()
-    console.log(this.series);
+    
   },
   data :() => ({
       icon:{
@@ -332,8 +343,6 @@ export default ({
       })
   ,
   
-  
-          
     methods: {
         changeLangueEN(){
             LocaleLangue.locale='en'
@@ -345,7 +354,7 @@ export default ({
         },
         Login(){
             this.LoginDialog = true
-        },
+        },//Permet d'ouvrire le pop up de connection
         async ConfirmLogin(){
             this.LoginDialog = false
             if (this.loginConnect !=="" && this.password !=="") {
@@ -358,7 +367,7 @@ export default ({
               this.IsConnect =true
             }
 
-        },
+        },//Permet de faire la requette de l'utilisateur a la BDD
          async CreateUser(){
           this.DialogCreateUser =false
           if (this.LoginCreate !== "" && this.passwordCreate !== "" && this.email !=="") {
@@ -366,13 +375,15 @@ export default ({
             await Api.CreateAccount(this.LoginCreate,this.passwordCreate,this.email)
           }
           
-        },
+        },//Permet de créé un user dans la bdd
         GoHome(){
             this.$router.push({
                 name:"Accueil"
             })
         },
         GoReco(){
+          var leUser = JSON.stringify(this.user)
+          sessionStorage.setItem("User",leUser)
             this.$router.push({
                 name:"Reco"
             })
@@ -389,20 +400,23 @@ export default ({
         StringFinal = StringFinal +")"
         console.log(StringFinal)
         this.Recherche(StringFinal)
-        },
+        },//Decoupe la chaine taper par l'utilisateur par des espace mise en forme ('njn',...)
         async Recherche(String){
           this.series = await Api.REcherche(String)
+          console.log(this.series)
          
-        },
+        },//Permet de faire la requette pour la recherche. Prend le un string sous forme ('khbkh',...)
         AddSerie(){
             this.$router.push({
               name:"AddSeries"
             })
 
-        },
+        },//Permet d'aller sur la page pour rajouter une serie
         Disconnect(){
               this.IsConnect = false
-        }
+          this.user = []
+          sessionStorage.removeItem("User")
+        }//Permet de deconnecter l'utilisateur
 
     },
     

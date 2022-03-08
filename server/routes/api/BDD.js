@@ -23,7 +23,7 @@ config.on('error',(err)=>{
 
 const AllSeries =(request,responce)=>{
 
-config.query("SELECT AVG(note) as rating ,serie.noms FROM NOTER join serie on noter.ids = serie.ids group by serie.noms ;",
+config.query("SELECT AVG(note)::numeric(10,1) as rating ,serie.noms FROM NOTER join serie on noter.ids = serie.ids group by serie.noms ;",
     (error,result)=>{
 
         if (error) {
@@ -59,7 +59,7 @@ const CreateAccount =(request,responce)=>{
                 if (error) {
                     throw error
                 }
-                console.log(result.rows);
+                
                 responce.status(200).json(result.rows);
             }
         )
@@ -68,22 +68,36 @@ const REcherche =(request,responce)=>{
    
 const string = request.body.String
  
-    config.query("SELECT s.*, COUNT(s.ids), SUM(c.occurence) FROM SERIE s, CONTENIR c, MOT m WHERE s.ids = c.ids AND m.idm = c.idm AND m.mot IN "+string +" GROUP BY s.ids ORDER BY COUNT(s.ids) DESC,SUM(c.occurence) DESC; ",
+    config.query("SELECT s.*, COUNT(s.ids), SUM(c.occurence),AVG(note)::numeric(10,1) as rating FROM SERIE s, CONTENIR c, MOT m ,noter n " +
+        "WHERE s.ids = c.ids AND m.idm = c.idm and n.ids = s.ids AND m.mot IN "+string +" GROUP BY s.ids ORDER BY COUNT(s.ids) DESC,SUM(c.occurence) DESC; ",
                 (error,result)=>{
             
                     if (error) {
                         throw error
                     }
-                    console.log(result.rows);
+                    
                     responce.status(200).json(result.rows);
                 }
             )
             }
+const GETRecoRAND =(request,responce)=>{
 
+    config.query("SELECT AVG(note)::numeric(10,1) as rating ,serie.noms\n" +
+        "FROM NOTER join serie on noter.ids = serie.ids group by serie.noms order by random() limit 2;",
+        (error,result)=>{
+
+            if (error) {
+                throw error
+            }
+            responce.status(200).json(result.rows);
+        }
+    )
+}
 module.exports ={
 
 AllSeries,
 UserConnect,
 CreateAccount,
-REcherche
+REcherche, 
+    GETRecoRANDs
 }
