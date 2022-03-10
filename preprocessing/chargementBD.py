@@ -9,6 +9,8 @@ import langid # pip install langid==1.1.6
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer,CountVectorizer
 
+
+
 #Début déclaration méthodes
 """
 #https://towardsdatascience.com/natural-language-processing-feature-engineering-using-tf-idf-e8b9d00e7e76
@@ -99,9 +101,10 @@ def traitement_stop_words(fichier_phrases) :
         #stocker les phrases dans un array temporaire
         stop_w_french = fileObj.read().splitlines()
         liste_stop_w = stop_w_french
-        print(liste_stop_w)
+
     else : 
         liste_stop_w = stopwords.words(langue)
+
 
     fichier_phrases_temp = []
     infos_fichier = []
@@ -116,7 +119,7 @@ def traitement_stop_words(fichier_phrases) :
 
     infos_fichier.append(fichier_phrases_temp)
     infos_fichier.append(langue)
-
+    
     return infos_fichier
 
 
@@ -143,9 +146,11 @@ def nettoyage_fichier_st (fichier_phrases,nom_fichier):
             fichier_phrases_temp.append(re.sub('^{[0-9]+}{[0-9]+}', '', phrase))
             
     fichier_phrases_temp = traitement_ponctuation(fichier_phrases_temp)
-    fichier_phrases_temp = traitement_stop_words(fichier_phrases_temp)
-
-    fichier_propre = fichier_phrases_temp
+    
+    langue  = definition_langue_fichier(fichier_phrases_temp)
+    #fichier_phrases_temp = traitement_stop_words(fichier_phrases_temp)
+    fichier_propre.append(fichier_phrases_temp)
+    fichier_propre.append(langue)
 
     return fichier_propre 
 
@@ -211,15 +216,28 @@ chemin_dossier = 'D:\\LP\\ProjetLP\\sr_test'
 noms_series = os.listdir(chemin_dossier)
 nb_series = 0
 
+#Créer deux dataset (un pour chaque langue), chacun de ses dataset contenant des chaines de caractères (chaque chaine représentant une série)
+dataset_vf = {}
+dataset_vo = {}
+
+#Créer un dataset qui contient un dataset pour l'angais et un autre pour le françcais 
+dataset = []
+
 #Pour chaque série on va
 for serie in noms_series :
     nb_series = nb_series +1
+    #Créer les dataset temporaires pour une série pour permettre l'ajout plus tard dans les dataset définitfs (ici une chaine représente 1 fichier de sous-titres)
+    dataset_vo_temp = []
+    dataset_vf_temp = []
+
+    #Créer l'entrée pour la série dans les deux dictionaires
+    if serie not in dataset_vf.keys() : 
+        dataset_vf[serie] = ""
+    if serie not in dataset_vo.keys() :
+        dataset_vo[serie] = ""
+
     #Ouvrir le dossier correspondant
     with os.scandir(chemin_dossier+'\\'+serie) as liste_fichiers_st :
-        #Créer deux dataset (un pour chaque langue), chacun de ses dataset contenant des chaines de caractères (chaque chaine représentant un fichier de sous-titres)
-        dataset_vf = []
-        dataset_vo = []
-        dataset = []
         #Pour chaque fichier de sous-titre
         for fichier in liste_fichiers_st:
             #ouvrir le ficher
@@ -233,43 +251,61 @@ for serie in noms_series :
             if len(fichier_phrases) !=0 :
                 fichier_ok = nettoyage_fichier_st(fichier_phrases,fichier.name)
                 if fichier_ok[1]=="english":
-                    dataset_vo.append(' '.join(fichier_ok[0]))
+                    dataset_vo_temp.append(' '.join(fichier_ok[0]))
                 else : 
-                    dataset_vf.append(' '.join(fichier_ok[0]))
+                    dataset_vf_temp.append(' '.join(fichier_ok[0]))
 
     print("Fin serie : "+serie)
-    dataset
+
+    # Rajout de la serie au dataset correspondant
+    dataset_vf[serie] = ' '.join(dataset_vf_temp)
+    dataset_vo[serie] = ' '.join(dataset_vo_temp)
     
-    #Calcul du TF-IDF sur les deux dataset (vérifier avant l'ajout si le dataset existe)
-    dataset.append(dataset_vf)
-    dataset.append(dataset_vo)
-    for data in dataset :
-        print(data)
-        countvectorizer = CountVectorizer()
-        count_wm = countvectorizer.fit_transform(data)
-        df_c = pd.DataFrame(count_wm[0].T.todense(), index=countvectorizer.get_feature_names_out(), columns=["COUNT"])
-        df_c = df_c.sort_values('COUNT', ascending=False)
-        print (df_c.head(50)) 
+#Ajout des deux dataset au dataset final (vérifier avant l'ajout si le dataset existe)
+dataset.append(dataset_vf)
+dataset.append(dataset_vo)
 
+print(dataset)
+for data in dataset :
+    #Mise en place de la liste cotenant l'ensemble des chaines représentant les séries
+    values_dict = list(data.values())
+    #print(values_dict)
+    keys_dict = list(data.keys()) 
 
-        tfIdfVectorizer=TfidfVectorizer(use_idf=True)
-        tfIdf = tfIdfVectorizer.fit_transform(data)
-        df = pd.DataFrame(tfIdf[0].T.todense(), index=tfIdfVectorizer.get_feature_names_out(), columns=["TF-IDF"])
-        df = df.sort_values('TF-IDF', ascending=False)
-        print (df.head(50)) 
-        for index, row in df.iterrows():
-            print(row)
+    """
+    countvectorizer = CountVectorizer()
+    count_wm = countvectorizer.fit_transform(data)
+    df_c = pd.DataFrame(count_wm[0].T.todense(), index=countvectorizer.get_feature_names_out(), columns=["COUNT"])
+    df_c = df_c.sort_values('COUNT', ascending=False)
+    print (df_c.head(50)) 
+    """
+
+    #Mise en place du TFIDF
+    tfidfvectorizer = TfidfVectorizer(use_idf=True)
+    tfidf_wm = tfidfvectorizer.fit_transform(values_dict)
+    print(tfidf_wm)
+    # get the first vector out (for the first document) 
+    first_vector_tfidfvectorizer=tfidf_wm[0] 
+    # place tf-idf values in a pandas data frame 
+    df = pd.DataFrame(first_vector_tfidfvectorizer.T.todense(), index=tfidfvectorizer.get_feature_names(), columns=["tfidf"]) 
+    df = df.sort_values(by=["tfidf"],ascending=False)
+    """tfidf_tokens = tfidfvectorizer.get_feature_names_out()
+    print(tfidf_tokens)
+    df_tfidfvect = pd.DataFrame(data = tfidf_wm.toarray(),index =keys_dict ,columns = tfidf_tokens)
+    df_tfidfvect = df_tfidfvect.transpose()
+    for column in keys_dict : 
+        df_tfidfvect = df_tfidfvect.sort_values(by=[column],ascending=False)
+        """
+    print(df.to_string())
         
-        #Calcul de l'occurence des mots qui selon le TD-IDF sont pertinents pour décrire la série
-        #Chargement dans la BDD
-            #Table Serie
-            #Table Mot
-            #Table Contenir
+    #Calcul de l'occurence des mots qui selon le TD-IDF sont pertinents pour décrire la série
+    #Chargement dans la BDD
+        #Table Serie
+        #Table Mot
+        #Table Contenir
 
 print("fin traitement")
 print(nb_series) 
-
-
 
 
 #Notes sur le TF-IDF
