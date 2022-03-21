@@ -154,7 +154,7 @@
              <v-card
                 class="mx-auto elevation-20"
                  color="#F5F5F5"
-                  
+              
                 style="max-width: 400px;"
              >
             <v-row justify="space-between">
@@ -170,13 +170,13 @@
      
         </v-row>
         <v-divider dark></v-divider>
-            <v-card-actions class="pa-4">
+            <v-card-actions class="pa-4" >
                 {{$t('Rate this series')}}
                 <v-spacer></v-spacer>
                 <span color="#E0E0E0">
                 ({{ Serie.rating }})
                 </span>
-                <v-rating 
+                <v-rating
                 v-model="Serie.rating"
                 :readonly="!IsConnect"
                 background-color="#FFEA00"
@@ -185,7 +185,10 @@
                 half-increments
                 hover
                 size="18"
-                ></v-rating>
+                @input="addRating($event,Serie.noms)"
+                >
+                  
+                </v-rating>
             </v-card-actions>
             </v-card>
           </v-item>
@@ -439,8 +442,21 @@ export default ({
               this.IsConnect = false
           this.user = []
           sessionStorage.removeItem("User")
-        }//Permet de deconnecter l'utilisateur
+        },//Permet de deconnecter l'utilisateur
+      async addRating(Note,Noms){
 
+        let ids = await  Api.GetIDS(Noms)
+        let DejaNote = await Api.TestDejanoter(this.user[0].idu,Noms)
+        console.log(DejaNote)
+        if (DejaNote.length !== 0){
+          await Api.UpdateNote(this.user[0].idu,Note,ids[0].ids)
+          
+        }else{          
+          await Api.InsertNote(this.user[0].idu,Note,ids[0].ids)
+        }
+        
+
+      }
     },
     
 })

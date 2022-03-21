@@ -310,7 +310,86 @@ static SerieNonNoter(Idu){
         });
 
     }
+    static  TestDejanoter(idu,Serie){
 
+        return new Promise((resolve,reject)=>{
+
+            axios.post("api/TestDejanoter", {idu:idu,Serie:Serie})
+                .then((res)=>{
+
+                    const data = res.data;
+
+                    resolve(data)
+                })
+                .catch((err)=>{
+                    reject(err)
+
+
+                });
+
+        });
+
+    }
+    static  InsertNote(idu,Note,ids){
+
+        return new Promise((resolve,reject)=>{
+
+            axios.post("api/InsertNote", {idu:idu,Note:Note,ids:ids})
+                .then((res)=>{
+
+                    const data = res.data;
+
+                    resolve(data)
+                })
+                .catch((err)=>{
+                    reject(err)
+
+
+                });
+
+        });
+
+    }
+    static  GetIDS(Nom){
+
+        return new Promise((resolve,reject)=>{
+
+            axios.post("api/GetIDS", {Noms:Nom})
+                .then((res)=>{
+
+                    const data = res.data;
+
+                    resolve(data)
+                })
+                .catch((err)=>{
+                    reject(err)
+
+
+                });
+
+        });
+
+    }
+    static  UpdateNote(idu,note,ids){
+
+        return new Promise((resolve,reject)=>{
+
+            axios.post("api/UpdateNote", {idu:idu,note:note,ids:ids})
+                .then((res)=>{
+
+                    const data = res.data;
+
+                    resolve(data)
+                })
+                .catch((err)=>{
+                    reject(err)
+
+
+                });
+
+        });
+
+    }
 }//classe
 
 export default Api;

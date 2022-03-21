@@ -18,4 +18,8 @@ router.post('/OlderMot',db.OlderMot)
 router.post('/TestMotexiste',db.TestMotexiste)
 router.post('/UpdateMotRecher',db.UpdateMotRecher)
 router.post('/InsertMot',db.InsertMot)
+router.post('/TestDejanoter',db.TestDejanoter)
+router.post('/InsertNote',db.InsertNote)
+router.post('/GetIDS',db.GetIds)
+router.post('/UpdateNote',db.UPDAteNote)
 module.exports = router;

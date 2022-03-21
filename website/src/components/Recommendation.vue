@@ -185,6 +185,7 @@
                       half-increments
                       hover
                       size="18"
+                      @input="addRating($event,Serie.noms)"
                   ></v-rating>
                 </v-card-actions>
               </v-card>
@@ -475,7 +476,20 @@ export default ({
       this.user = []
       sessionStorage.removeItem("User")
     }//Permet de deconnecter l'utilisateur
+    async addRating(Note,Noms){
 
+      let ids = await  Api.GetIDS(Noms)
+      let DejaNote = await Api.TestDejanoter(this.user[0].idu,Noms)
+      console.log(DejaNote)
+      if (DejaNote.length !== 0){
+        await Api.UpdateNote(this.user[0].idu,Note,ids[0].ids)
+
+      }else{
+        await Api.InsertNote(this.user[0].idu,Note,ids[0].ids)
+      }
+
+
+    }
   },
 
 })

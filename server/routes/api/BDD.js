@@ -1,4 +1,4 @@
-const { log } = require("console");
+
 
 const pg = require("pg").Pool;
 
@@ -262,6 +262,75 @@ const InsertMot =(request,responce)=>{
         }
     )
 }
+const TestDejanoter =(request,responce)=>{
+    const idu = request.body.idu
+    const Nom = request.body.Serie
+    config.query(
+
+        "Select * from noter join Serie using(ids) where noms = '"+Nom+"' and idu="+idu +" ;"
+        ,
+        (error,result)=> {
+
+            if (error) {
+                throw error
+            }
+            responce.status(200).json(result.rows);
+        }
+    )
+}
+const InsertNote =(request,responce)=>{
+    const idu = request.body.idu
+
+    const Note = request.body.Note
+    const ids = request.body.ids
+
+    config.query(
+
+        "Insert into noter VALUES("+ids+","+idu+","+Note+") "
+        ,
+        (error,result)=> {
+
+            if (error) {
+                throw error
+            }
+            responce.status(200).json(result.rows);
+        }
+    )
+}
+const GetIds =(request,responce)=>{
+    const Noms = request.body.Noms
+    console.log(Noms)
+    config.query(
+
+        "Select ids from Serie where noms = '"+Noms +"' ;" 
+        ,
+        (error,result)=> {
+
+            if (error) {
+                throw error
+            }
+            responce.status(200).json(result.rows);
+        }
+    )
+}
+const  UPDAteNote=(request,responce)=>{
+    const ids = request.body.ids
+    const  idu= request.body.idu
+    const note = request.body.note
+    
+    config.query(
+
+        "Update noter set note = " +note+ " where idu =" +idu+ " and ids="+ids+";"
+        ,
+        (error,result)=> {
+
+            if (error) {
+                throw error
+            }
+            responce.status(200).json(result.rows);
+        }
+    )
+}
 module.exports ={
 
 AllSeries,
@@ -278,5 +347,9 @@ TestNoter,
     OlderMot,
     InsertMot,
     TestMotexiste,
-    UpdateMotRecher
+    UpdateMotRecher,
+    TestDejanoter,
+    InsertNote,
+    GetIds,
+    UPDAteNote
 }
