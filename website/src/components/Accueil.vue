@@ -6,7 +6,7 @@
       dense
         dark
     ><!-- Bar color indigo-->
-      <v-toolbar-title>LPProd</v-toolbar-title>
+      <v-toolbar-title>Series-O-Rama</v-toolbar-title>
 
       <v-spacer></v-spacer>
       <v-col>
@@ -176,8 +176,9 @@
                 <span color="#E0E0E0">
                 ({{ Serie.rating }})
                 </span>
-                <v-rating
+                <v-rating 
                 v-model="Serie.rating"
+                :readonly="!IsConnect"
                 background-color="#FFEA00"
                 color="#FFD600"
                 dense
@@ -403,7 +404,29 @@ export default ({
         },//Decoupe la chaine taper par l'utilisateur par des espace mise en forme ('njn',...)
         async Recherche(String){
           this.series = await Api.REcherche(String)
-          console.log(this.series)
+          if (this.IsConnect === true){
+            var table = this.StringRecherche.split(" ")
+            for (const mot of table) {
+             let Nbrecherche = await  Api.TestNbMotRechercher(this.user[0].idu)
+              if (Nbrecherche[0].count < 5){
+                let theMot =  await Api.TestMotexiste(mot)
+                
+                if (theMot.length >0){
+                  await Api.InsertMot(this.user[0].idu,theMot[0].idm)
+                }
+              
+              }else {
+                let oldermot = await Api.OlderMot(this.user[0].idu)
+                let theMot = await Api.TestMotexiste(mot)
+                
+                if (theMot.length > 0) {
+                  await Api.UpdateMotRecher(this.user[0].idu, theMot[0].idm,oldermot[0].idm)
+                }
+
+              }
+              
+            }
+          }
          
         },//Permet de faire la requette pour la recherche. Prend le un string sous forme ('khbkh',...)
         AddSerie(){

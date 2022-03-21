@@ -112,6 +112,204 @@ static GetRecoRAND(){
         });
 
     }
+static TestNoter(Idu){
+
+        return new Promise((resolve,reject)=>{
+
+            axios.post("api/TestNoter", {Idu:Idu})
+                .then((res)=>{
+
+                    const data = res.data;
+                    resolve(data)
+                })
+                .catch((err)=>{
+                    reject(err)
+
+
+                });
+
+        });
+
+    }
+static RecomendationViaLike(idu,ids){
+
+        return new Promise((resolve,reject)=>{
+
+            axios.post("api/RecomendationViaLike", {Idu:idu,ids:ids})
+                .then((res)=>{
+
+                    const data = res.data;
+                    resolve(data)
+                })
+                .catch((err)=>{
+                    reject(err)
+
+
+                });
+
+        });
+
+    }
+static SerieNonNoter(Idu){
+
+        return new Promise((resolve,reject)=>{
+
+            axios.post("api/SerieNonNoter", {Idu:Idu})
+                .then((res)=>{
+
+                    const data = res.data;
+                    
+                    resolve(data)
+                })
+                .catch((err)=>{
+                    reject(err)
+
+
+                });
+
+        });
+
+    }
+    static RechercheTest (Idu){
+
+        return new Promise((resolve,reject)=>{
+
+            axios.post("api/RechercheTest", {Idu:Idu})
+                .then((res)=>{
+
+                    const data = res.data;
+
+                    resolve(data)
+                })
+                .catch((err)=>{
+                    reject(err)
+
+
+                });
+
+        });
+
+    }
+    static RecoViaRecherche (Idu){
+
+        return new Promise((resolve,reject)=>{
+
+            axios.post("api/RecoViaRecherche", {Idu:Idu})
+                .then((res)=>{
+
+                    const data = res.data;
+
+                    resolve(data)
+                })
+                .catch((err)=>{
+                    reject(err)
+
+
+                });
+
+        });
+
+    }
+    static TestNbMotRechercher (Idu){
+
+        return new Promise((resolve,reject)=>{
+
+            axios.post("api/TestNbMotRechercher", {Idu:Idu})
+                .then((res)=>{
+
+                    const data = res.data;
+
+                    resolve(data)
+                })
+                .catch((err)=>{
+                    reject(err)
+
+
+                });
+
+        });
+
+    }
+    static OlderMot (Idu){
+
+        return new Promise((resolve,reject)=>{
+
+            axios.post("api/OlderMot", {Idu:Idu})
+                .then((res)=>{
+
+                    const data = res.data;
+
+                    resolve(data)
+                })
+                .catch((err)=>{
+                    reject(err)
+
+
+                });
+
+        });
+
+    }
+    static TestMotexiste (Mot){
+
+        return new Promise((resolve,reject)=>{
+
+            axios.post("api/TestMotexiste", {Mot:Mot})
+                .then((res)=>{
+
+                    const data = res.data;
+
+                    resolve(data)
+                })
+                .catch((err)=>{
+                    reject(err)
+
+
+                });
+
+        });
+
+    }
+    static UpdateMotRecher (idu,idm,idom){
+
+        return new Promise((resolve,reject)=>{
+
+            axios.post("api/UpdateMotRecher", {idu:idu,idm:idm,idom:idom})
+                .then((res)=>{
+
+                    const data = res.data;
+
+                    resolve(data)
+                })
+                .catch((err)=>{
+                    reject(err)
+
+
+                });
+
+        });
+
+    }
+    static InsertMot (idu,idm){
+
+        return new Promise((resolve,reject)=>{
+
+            axios.post("api/InsertMot", {idu:idu,idm:idm})
+                .then((res)=>{
+
+                    const data = res.data;
+
+                    resolve(data)
+                })
+                .catch((err)=>{
+                    reject(err)
+
+
+                });
+
+        });
+
+    }
 
 }//classe
 

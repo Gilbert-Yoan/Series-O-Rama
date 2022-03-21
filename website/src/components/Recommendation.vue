@@ -6,7 +6,7 @@
         dense
         dark
     ><!-- Bar color indigo-->
-      <v-toolbar-title>LPProd</v-toolbar-title>
+      <v-toolbar-title>Series-O-Rama</v-toolbar-title>
 
       <v-spacer></v-spacer>
       <v-col>
@@ -178,6 +178,7 @@
                 </span>
                   <v-rating
                       v-model="Serie.rating"
+                      :readonly="!IsConnect"
                       background-color="#FFEA00"
                       color="#FFD600"
                       dense
@@ -299,6 +300,7 @@
 import LocaleLangue from "../i18n"
 import { mdiMagnify,mdiPlusBox,mdiEye,mdiEyeOff    } from '@mdi/js';
 import  Api from "../Api"
+
 export default ({
 
   async created() {
@@ -307,8 +309,38 @@ export default ({
     if (user !== null && user !== "[]" ){
 
       this.user = JSON.parse(user)
+      let Note = Api.TestNoter(this.user[0].idu)
+      
+      if (Note.length !== 0){
+        let LesSeriesNoNoter = await Api.SerieNonNoter(this.user[0].idu)
+        console.log(LesSeriesNoNoter)
+        console.log('ICI')
+        for (const lesSeriesNoNoterElement of LesSeriesNoNoter) {
+          
+          let Lanote = await Api.RecomendationViaLike(this.user[0].idu,lesSeriesNoNoterElement.ids)
+          if (Lanote[0].rating >0){
+            var objet = {
+              rating:Lanote[0].rating,
+              noms:lesSeriesNoNoterElement.noms
+
+            }
+            this.series.push(objet)
+          }
+          
+          
+        }
+       
+      }//Test Si il a noter des series
+      else{
+        let recherche = await Api.RechercheTest(this.user[0].idu)
+        if (recherche.length !== 0) { // Test si il a chercher avec des mot
+          this.series = await Api.RecoViaRecherche
+        }else{
+          this.series = await Api.GetRecoRAND()
+        }
+        
+      }
       this.IsConnect = true
-      this.series = await Api.GetAllSeries()
     }else{
       this.IsConnect = false
       this.series = await Api.GetRecoRAND()
@@ -407,6 +439,29 @@ export default ({
     },//Decoupe la chaine taper par l'utilisateur par des espace mise en forme ('njn',...)
     async Recherche(String){
       this.series = await Api.REcherche(String)
+      if (this.IsConnect === true){
+        var table = this.StringRecherche.split(" ")
+        for (const mot of table) {
+          let Nbrecherche = await  Api.TestNbMotRechercher(this.user[0].idu)
+          if (Nbrecherche[0].count < 5){
+            let theMot =  await Api.TestMotexiste(mot)
+
+            if (theMot.length >0){
+              await Api.InsertMot(this.user[0].idu,theMot[0].idm)
+            }
+
+          }else {
+            let oldermot = await Api.OlderMot(this.user[0].idu)
+            let theMot = await Api.TestMotexiste(mot)
+
+            if (theMot.length > 0) {
+              await Api.UpdateMotRecher(this.user[0].idu, theMot[0].idm,oldermot[0].idm)
+            }
+
+          }
+
+        }
+      }
 
     },//Permet de faire la requette pour la recherche. Prend le un string sous forme ('khbkh',...)
     AddSerie(){

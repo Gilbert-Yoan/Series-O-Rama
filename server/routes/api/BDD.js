@@ -93,11 +93,190 @@ const GETRecoRAND =(request,responce)=>{
         }
     )
 }
+const TestNoter =(request,responce)=>{
+    const Idu = request.body.Idu
+    config.query(
+        "Select * from noter where idu = "+Idu,
+        (error,result)=> {
+
+            if (error) {
+                throw error
+            }
+            responce.status(200).json(result.rows);
+        }
+    )
+}
+const RecomendationViaLike =(request,responce)=>{
+    const Idu = request.body.Idu
+    const Ids = request.body.ids
+
+    config.query(
+        "WITH MOYENNES AS (SELECT idu, AVG(note) AS moy FROM NOTER GROUP BY idu),"+ 
+        "NOTES_RETRANCHES AS (SELECT m.idu,n.ids, note-moy AS note FROM NOTER n, MOYENNES m WHERE m.idu IN (SELECT idu FROM NOTER WHERE ids IN (SELECT ids FROM NOTER WHERE idu="+Idu+")) AND m.idu = n.idu),"+ 
+        "HAUT_SIMILARITES AS (" +
+        "   SELECT SUM(n.note*n2.note)as somme,n.idu " +
+        "    FROM NOTES_RETRANCHES n, NOTES_RETRANCHES n2 " +
+        "    WHERE n.idu!=n2.idu AND n2.idu=3 AND n.ids=n2.ids " +
+        "    GROUP BY n.idu)," +
+        "BAS_SIMILARITES AS (" +
+        "    SELECT SQRT(SUM(POWER(n.note,2))*SUM(POWER(n2.note,2))) as racine, n.idu " +
+        "    FROM NOTES_RETRANCHES n, NOTES_RETRANCHES n2 " +
+        "     WHERE n.idu!=n2.idu AND n2.idu=3 AND n.ids=n2.ids" +
+        "    GROUP BY n.idu)," +
+        "SIMILARITES AS (SELECT somme/racine as similarite, h.idu FROM HAUT_SIMILARITES h,BAS_SIMILARITES b WHERE h.idu=b.idu)," +
+        "PARTIE_HAUTE AS (SELECT SUM(n.note*s.similarite) as haute FROM NOTES_RETRANCHES n, SIMILARITES s WHERE n.idu = s.idu AND n.ids = " + Ids+")," +
+        "SOMME_SIMILARITES AS (SELECT SUM(ABS(similarite)) as sim FROM SIMILARITES)" +
+        " SELECT (moy+(haute/sim))::numeric(10,1) as rating FROM MOYENNES m, PARTIE_HAUTE p, SOMME_SIMILARITES s WHERE m.idu ="+Idu+";",
+        (error,result)=> {
+
+            if (error) {
+                throw error
+            }
+            responce.status(200).json(result.rows);
+        }
+    )
+}
+
+const SerieNonNoter =(request,responce)=>{
+    const Idu = request.body.Idu
+    config.query(
+        "Select noms,serie.ids from serie where ids not in (Select ids from noter where idu = "+Idu + ")",
+        (error,result)=> {
+
+            if (error) {
+                throw error
+            }
+            responce.status(200).json(result.rows);
+        }
+    )
+}
+const RechercheTest =(request,responce)=>{
+    const Idu = request.body.Idu
+    config.query(
+        "Select * from cherche where idu="+Idu,
+        (error,result)=> {
+
+            if (error) {
+                throw error
+            }
+            responce.status(200).json(result.rows);
+        }
+    )
+}
+const RecoViaRecherche =(request,responce)=>{
+    const Idu = request.body.Idu
+    config.query(
+        "SELECT s.ids, s.nomS, AVG(n.note) FROM serie s, contenir c, noter n " +
+        "WHERE c.ids = n.ids AND c.ids = s.ids " +
+        "AND c.idm IN (SELECT idm FROM CHERCHER WHERE idu="+Idu+")" +
+        "GROUP BY s.ids, s.nomS;",
+        (error,result)=> {
+
+            if (error) {
+                throw error
+            }
+            responce.status(200).json(result.rows);
+        }
+    )
+}
+const TestNbMotRechercher =(request,responce)=>{
+    const Idu = request.body.Idu
+    config.query(
+        "Select COUNT(*) from chercher where idu= "+Idu 
+        ,
+        (error,result)=> {
+
+            if (error) {
+                throw error
+            }
+            responce.status(200).json(result.rows);
+        }
+    )
+}
+const OlderMot =(request,responce)=>{
+    const Idu = request.body.Idu
+    config.query(
+        
+        "Select Min(temps),idm,mot from chercher join mot using(idm) where idu= "+Idu+" group by idm , mot Limit 1 "
+        ,
+        (error,result)=> {
+
+            if (error) {
+                throw error
+            }
+            responce.status(200).json(result.rows);
+        }
+    )
+}
+const TestMotexiste =(request,responce)=>{
+    const Mot = request.body.Mot
+    config.query(
+
+        "Select * from mot where mot = '"+Mot+"'"
+        ,
+        (error,result)=> {
+
+            if (error) {
+                throw error
+            }
+            responce.status(200).json(result.rows);
+        }
+    )
+}
+const UpdateMotRecher =(request,responce)=>{
+    const idm = request.body.idm
+    const idu = request.body.idu
+    const idom = request.body.idom
+
+    console.log(idm)
+    console.log(idu)
+    console.log(idom)
+
+    config.query(
+
+        "Update chercher set idm ="+idm+" ,temps = now() where idu = "+idu+" and idm ="+idom+" ;"
+        ,
+        (error,result)=> {
+
+            if (error) {
+                throw error
+            }
+            responce.status(200).json(result.rows);
+        }
+    )
+}
+const InsertMot =(request,responce)=>{
+    const idm = request.body.idm
+    const idu = request.body.idu
+    
+    config.query(
+
+        "Insert into chercher VALUES("+idu+","+idm+",now()) "
+        ,
+        (error,result)=> {
+
+            if (error) {
+                throw error
+            }
+            responce.status(200).json(result.rows);
+        }
+    )
+}
 module.exports ={
 
 AllSeries,
 UserConnect,
 CreateAccount,
 REcherche, 
-    GETRecoRANDs
+GETRecoRAND,
+TestNoter,
+    RecomendationViaLike,
+    SerieNonNoter,
+    RechercheTest,
+    RecoViaRecherche,
+    TestNbMotRechercher,
+    OlderMot,
+    InsertMot,
+    TestMotexiste,
+    UpdateMotRecher
 }
