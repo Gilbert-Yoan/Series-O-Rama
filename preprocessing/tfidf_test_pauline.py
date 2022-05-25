@@ -6,9 +6,37 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
 from nltk.stem import WordNetLemmatizer
+import langid
 
 
 #1 DOCUMENT = 1 SERIE 
+
+#Définition fonction détection de la langue 
+# IN  : Un array contenant l'ensemble des phrases d'un fichier de sous-titres pour une série
+# OUT : La langue du fichier de sous-titres
+def definition_langue_fichier(fichier_phrases):
+
+    #Création d'un dictionnaire pour stocker les résultats de la détection de la langue 
+    dict_lg = {'en':0,'oth':0}
+
+    #On récupère seulement une partie des phrases pour tester
+    nb_phrases = int(len(fichier_phrases)/3)
+    phrases_test = fichier_phrases[0:nb_phrases]
+
+    #Identification de la langue
+    for phrase in phrases_test :
+        lg = langid.classify(phrase)[0]
+        if lg == 'en':
+            dict_lg["en"] = dict_lg["en"] + 1
+        else:
+            dict_lg["oth"] = dict_lg["oth"] + 1
+
+    if dict_lg["en"]>dict_lg["oth"] : 
+        return "english"
+    else: 
+        return "other"
+
+
 #Définiton fonctions nettoyage fichiers
 
 def tester_pattern(pattern, string_test):
@@ -48,9 +76,7 @@ def nettoyage_fichier_st (fichier_phrases,nom_fichier):
 
     return fichier_phrases_temp 
 
-
-# IN  : Un array contenant l'ensemble des phrases d'un fichier de sous-titres pour une série
-# OUT : Un array contenant l'ensemble des phrases d'un fichier de sous-titres pour une série sans la ponctuation
+# Définition des tags pour pouvoir par la suite faire la lemmatization
 #https://www.geeksforgeeks.org/python-lemmatization-approaches-with-examples/
 #https://www.holisticseo.digital/python-seo/nltk/lemmatize
 
@@ -67,7 +93,7 @@ def pos_tagger(nltk_tag):
         return None
 
 # IN  : Un array contenant l'ensemble des phrases d'un fichier de sous-titres pour une série
-# OUT : Un array contenant l'ensemble des phrases d'un fichier de sous-titres pour une série sans la ponctuation  
+# OUT : Un array contenant l'ensemble des phrases d'un fichier de sous-titres pour une série sans la ponctuation et avec la lemmatization 
 def traitement_mots(fichier_phrases) :
     phrases_temp = []
 
@@ -114,27 +140,27 @@ def traitement_mots(fichier_phrases) :
 #--------------------------------------------------------------------------------
 #Définition fonctions TFIDF
 
-def calculer_tf(documents):
-    #Cntient le nombre d'apparitons de chaque terme dans le corpus entier
+def calculer_tf(document):
+    #Contient le nombre d'apparitons de chaque terme dans le corpus entier de la serie ({})
     tf = []
     #Contient le nombre de series ou le mot apparait 
-    df = {}
+    #df = {}
     sw = stopwords.words('english')
     cur_index = 0
-    for document in documents:
-        tf.append({})
-        for mot in document:
-            if mot in tf[cur_index] and mot not in sw:
-                tf[cur_index][mot] = tf[cur_index][mot] + 1
-            elif mot not in sw:
-                tf[cur_index][mot] = 1
-                if mot in df:
-                    df[mot] += 1
-                else:
-                    df[mot] = 1
+    
+    tf.append({})
+    for mot in document:
+        if mot in tf[cur_index] and mot not in sw:
+            tf[cur_index][mot] = tf[cur_index][mot] + 1
+        elif mot not in sw:
+            tf[cur_index][mot] = 1
+            #if mot in df:
+                #df[mot] += 1
+            #else:
+                #df[mot] = 1
             
-        cur_index += 1
-    return tf, df
+    cur_index += 1
+    return tf #, df
 
 
 def calculer_idf(documents,df):
@@ -151,12 +177,15 @@ def calculer_tf_idf(tf,idf):
             tfidf[i][mot] = tf[i][mot]*idf[mot]
     return tfidf
 
+#--------------------------------------------------------------------------------
+#Début du programme
+
 
 #Récupération du nom de toutes les entrées contenues dans le dossier sous-titres (ici on va tester avec un dossier plus petit)
 chemin_dossier = 'D:\\LP\\ProjetLP\\sr_test'
 noms_series = os.listdir(chemin_dossier)
 
-liste_series = []
+serie_propre = ""
 liste_temp = []
 
 #Pour chaque série on va
@@ -174,48 +203,56 @@ for serie in noms_series :
             #fermer le fichier
             fileObj.close()
 
+            
             #Nettoyer les phrases récupérées du fichier de sous-titre (si il n'est pas vide) en fonction du type de fichier (srt ou sub) et ajout du fichier à la liste temporaire
             if len(fichier_phrases) !=0 :
                 fichier_phrases = nettoyage_fichier_st(fichier_phrases,fichier.name)
-                fichier_phrases = traitement_mots(fichier_phrases)
+                if definition_langue_fichier(fichier_phrases)=='english':
+                    fichier_phrases = traitement_mots(fichier_phrases)
 
-            #Ajout du fichier prpore à la serie (1 fichier => 1 Chaine)
-            liste_temp.append(' '.join(fichier_phrases))
+                    #Ajout du fichier prpore à la serie (1 fichier => 1 Chaine)
+                    liste_temp.append(' '.join(fichier_phrases))
 
 
     #print('LISTE TEMP')
     #print(liste_temp)
     print("Fin serie : "+serie)
-    #Transformation de la serie en une chaine de caractère et ajout à la liste qui contient toutes les series 
-    liste_series.append(' '.join(liste_temp))
 
-#print(liste_series)
-i = 0
-while i < len(liste_series): 
-    #Suppression des espaces en trop
-    liste_series[i] = re.sub('\s+', ' ', liste_series[i])
-    liste_series[i] = liste_series[i].split(' ')
-    i += 1
+    #Transformation de la serie en une chaine de caractère  (si la serie contient une version anglaise)
+    if len(liste_temp)>=1 : 
+        print("nb fichiers anglais")
+        print(len(liste_temp))
+        serie_propre = (' '.join(liste_temp))
 
-#print(liste_series)
-print("tf")
-print(calculer_tf(liste_series)[0])
-print("df")
-print(calculer_tf(liste_series)[1])
-print("idf")
-print(calculer_idf(liste_series,calculer_tf(liste_series)[1]))
-print("tf*idf")
-print(calculer_tf_idf(calculer_tf(liste_series)[0],calculer_idf(liste_series,calculer_tf(liste_series)[1])))
+    
+        #Suppression des espaces en trop
+        serie_propre = re.sub('\s+', ' ', serie_propre)
+        serie_propre = serie_propre.split(' ')
+    
+        print(serie_propre)
+        #Calcul du tf de la serie 
+        res_tf = calculer_tf(serie_propre)
 
-res_tfidf = calculer_tf_idf(calculer_tf(liste_series)[0],calculer_idf(liste_series,calculer_tf(liste_series)[1]))
-
-for serie in res_tfidf:
-    for key, value in sorted(serie.items(), reverse=True, key=lambda item: item[1]):
-        print(key,value)
+        for serie in res_tf:
+            for key, value in serie.items():
+                print(key,value)
 
     print('Serie suivante')
+#fin for
 
 
-#A REGARDER
-# - Identification de la serie à la fin du TFIDF
-#
+#print(liste_series)
+#print("tf")
+#print(calculer_tf(liste_series))#[0])
+#print("df")
+#print(calculer_tf(liste_series)[1])
+#print("idf")
+#print(calculer_idf(liste_series,calculer_tf(liste_series)[1]))
+#print("tf*idf")
+#print(calculer_tf_idf(calculer_tf(liste_series)[0],calculer_idf(liste_series,calculer_tf(liste_series)[1])))
+
+
+ #- Si la serie ne possede pas de version anglaise est-ce qu'on l'ajoute dans la BDD ? 
+ 
+
+
