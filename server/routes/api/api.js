@@ -22,4 +22,5 @@ router.post('/TestDejanoter',db.TestDejanoter)
 router.post('/InsertNote',db.InsertNote)
 router.post('/GetIDS',db.GetIds)
 router.post('/UpdateNote',db.UPDAteNote)
+router.post('/CopyFichier',db.CopyFichier)
 module.exports = router;

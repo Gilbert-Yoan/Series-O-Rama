@@ -1,7 +1,7 @@
 
 
 const pg = require("pg").Pool;
-
+const fs = require("fs");
 
 var config = new pg({
 
@@ -331,6 +331,27 @@ const  UPDAteNote=(request,responce)=>{
         }
     )
 }
+
+const  CopyFichier=(request,responce)=>{
+
+    var  Nomfichier = request.body.Nomfichier
+    
+    const  Data= request.body.Text
+    const  NomSerie= request.body.NomSerie
+
+    if (!fs.existsSync("../Source/"+NomSerie)){
+        fs.mkdirSync("../Source/"+NomSerie, { recursive: true });
+    }
+    Nomfichier = "../Source/" + NomSerie + "/"+Nomfichier
+    fs.writeFile(Nomfichier, Data, err2 => {
+        if (err2) {
+          console.log(err2);
+          return;
+        }
+        responce.status(200).json(true);
+    })
+
+}
 module.exports ={
 
 AllSeries,
@@ -351,5 +372,6 @@ TestNoter,
     TestDejanoter,
     InsertNote,
     GetIds,
-    UPDAteNote
+    UPDAteNote,
+    CopyFichier
 }

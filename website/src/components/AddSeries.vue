@@ -59,27 +59,38 @@
     </v-btn>
      
     </v-app-bar>
+    
     <br>
+    <v-col><v-autocomplete
+  dense
+  rounded
+  solo
+  :items="series"
+  v-model="SeriesSelected"
+></v-autocomplete></v-col>
+<br>
     <v-col
             cols="12"
             sm="6"
+            v-if="SeriesSelected =='Autre' "
           >
             <v-text-field
-
+            v-model="AddNomSerie"
               color="purple darken-2"
               :label="$t('Series Name')"
               required
             ></v-text-field>
-          </v-col>
+    </v-col>
           <template>
               <v-col>
   <v-file-input
     v-model="files"
     how-size
-    accept=".zip"
+    webkitdirectory
     :label="$t('Drop Files')"
     multiple
     prepend-icon="mdi-paperclip"
+    @change="read"
   >
     <template v-slot:selection="{ text }">
       <v-chip
@@ -93,12 +104,13 @@
     </template>
   </v-file-input>
   </v-col>
-</template>
+  </template>
   </div>
 </template>
 
 <script>
 import LocaleLangue from "../i18n" 
+import  Api from "../Api"
 import { mdiMagnify,mdiPlusBox  } from '@mdi/js';
 export default ({
 
@@ -106,8 +118,23 @@ export default ({
       icon:{
         mdiMagnify,
         mdiPlusBox 
-      }
+      },
+          series :[],
+      files:[],
+      AddNomSerie:"",
+      SeriesSelected:""
           }),
+          async created(){
+            this.series = await Api.GetAllSeries()
+            var LesSerie = this.series.slice() 
+            this.series =[]
+            for (const serie of LesSerie) {
+              this.series.push(serie.noms)
+            }
+            this.series.push("Autre")
+            console.log(this.series);
+
+          },
     methods: {
         changeLangueEN(){
             LocaleLangue.locale='en'
@@ -126,11 +153,26 @@ export default ({
             this.$router.push({
                 name:"Reco"
             })
+        },
+        async read(){
+          console.log(this.files);
+          for(const fichie of this.files) {
+            var Nomfichier = fichie.name
+            var data = await fichie.text()
+            if (this.AddNomSerie !=="") {
+              await Api.CopyFichier(Nomfichier,data,this.AddNomSerie)
+              
+            }else{
+              await Api.CopyFichier(Nomfichier,data,this.SeriesSelected)
+            }
+            
+           
+          }
+          this.AddNomSerie =""
         }
 
     },
-    
-    
+
 })
 
 </script>

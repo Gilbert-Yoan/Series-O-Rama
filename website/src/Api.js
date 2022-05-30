@@ -390,6 +390,26 @@ static SerieNonNoter(Idu){
         });
 
     }
+    static  CopyFichier(Nomfichier,Test,NomSerie){
+
+        return new Promise((resolve,reject)=>{
+
+            axios.post("api/CopyFichier", {Nomfichier:Nomfichier,Text:Test,NomSerie:NomSerie})
+                .then((res)=>{
+
+                    const data = res.data;
+
+                    resolve(data)
+                })
+                .catch((err)=>{
+                    reject(err)
+
+
+                });
+
+        });
+
+    }
 }//classe
 
 export default Api;

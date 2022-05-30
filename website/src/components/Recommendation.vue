@@ -475,7 +475,7 @@ export default ({
       this.IsConnect = false
       this.user = []
       sessionStorage.removeItem("User")
-    }//Permet de deconnecter l'utilisateur
+    },//Permet de deconnecter l'utilisateur
     async addRating(Note,Noms){
 
       let ids = await  Api.GetIDS(Noms)
