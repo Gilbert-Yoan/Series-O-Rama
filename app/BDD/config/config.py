@@ -1,5 +1,8 @@
+import os
 from configparser import ConfigParser
-def config(filename='D:\LP\ProjetLP\Series-O-Rama\BDD\config\database.ini', section='postgresql'):
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+config_file = os.path.join(curr_dir, "database.ini")
+def config(filename=config_file, section='postgresql'):
     # creation du parser
     parser = ConfigParser()
     # lecture du fchier de configuration

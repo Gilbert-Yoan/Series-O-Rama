@@ -13,13 +13,16 @@ import sys
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 python_target = os.path.join(curr_dir,"..","preprocessing")
 sys.path.append(python_target)
-from methodes_preprocessing import *
+
+from methodes_preprocessing import traitement_mots, connexionBDD, fermetureBDD
 
 
 #Ici on suppose que les search_words sont des chaines de caractères simples séparées par des espaces
 def get_search_results(cursor, search_words):
     words_list = search_words.split(' ')
     print(words_list)
+    res = traitement_mots(words_list)
+    print(res)
     res = []
     for word in words_list:
         query = "WITH allDoc AS (SELECT COUNT(s.ids) total FROM serie s) , \
@@ -33,36 +36,13 @@ def get_search_results(cursor, search_words):
     return res
 
 
-
-#-----------------------------------------------------------------------------
-#https://www.postgresqltutorial.com/postgresql-python/
-#Définition méthodes BDD
-
-# Connexion à la base locale PostGreSQL
-def connexionBDD ():
-    #Création de la connexion
-    conn = pg.connect(
-        host="localhost",
-        database="petut",
-        user="postgres",
-        password="passroot",
-        port = '5432')
-    #Création du curseur pour pouvoir manipuler la base
-    cur = conn.cursor()
-    return conn, cur
-		
-# Fermeture de la connexion à la base locale PostGreSQL
-def fermetureBDD (connexion, curseur):
-    curseur.close()
-    connexion.close()
-
 #--------------------------------------------------------------------------------
 #Début du programme
 
 #Connexion a la BDD
 connexion, curseur = connexionBDD()
 
-res = get_search_results(curseur, "Magie Crime")
+res = get_search_results(curseur, "students studying studies was cavalry chivalry")
     
 print(res)
 #Fermeture de l'accès à la BDD
