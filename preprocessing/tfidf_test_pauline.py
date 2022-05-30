@@ -1,12 +1,14 @@
 #Liste imports
 import os
 from math import *
-import re 
+import re
+from sqlite3 import Cursor 
 import nltk
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
 from nltk.stem import WordNetLemmatizer
 import langid
+import psycopg2 as pg
 
 
 #1 DOCUMENT = 1 SERIE 
@@ -177,9 +179,45 @@ def calculer_tf_idf(tf,idf):
             tfidf[i][mot] = tf[i][mot]*idf[mot]
     return tfidf
 
+
+#--------------------------------------------------------------------------------
+#https://www.postgresqltutorial.com/postgresql-python/
+#Définition méthodes BDD
+
+# Connexion à la base locale PostGreSQL
+def connexionBDD ():
+    #Création de la connexion
+    conn = pg.connect(
+        host="localhost",
+        database="postgres",
+        user="postgres",
+        password="PauliNe1999",
+        port = '5432')
+    #Création du curseur pour pouvoir manipuler la base
+    cur = conn.cursor()
+    return conn, cur
+		
+
+#Rajout de la serie en BDD et retourne son id 
+#https://www.postgresqltutorial.com/postgresql-python/insert/
+def insert_serie(connexion, curseur, nom_serie):
+    sql = """INSERT INTO serietest(noms) VALUES(%s) RETURNING ids;"""
+    curseur.execute(sql, (nom_serie,))
+    connexion.commit()
+    #Renvoi de l'ID de la serie
+    return curseur.fetchone()[0]
+
+
+# Fermeture de la connexion à la base locale PostGreSQL
+def fermetureBDD (connexion, curseur):
+    curseur.close()
+    connexion.close()
+
 #--------------------------------------------------------------------------------
 #Début du programme
 
+#Connexion a la BDD
+connexion, curseur = connexionBDD()
 
 #Récupération du nom de toutes les entrées contenues dans le dossier sous-titres (ici on va tester avec un dossier plus petit)
 chemin_dossier = 'D:\\LP\\ProjetLP\\sr_test'
@@ -216,30 +254,45 @@ for serie in noms_series :
 
     #print('LISTE TEMP')
     #print(liste_temp)
-    print("Fin serie : "+serie)
+    print("Fin traitement serie : "+serie)
 
-    #Transformation de la serie en une chaine de caractère  (si la serie contient une version anglaise)
+    
+
+    #Transformation de la serie en une chaine de caractère  (si la serie contient une version anglaise) et rajout dans la BDD
     if len(liste_temp)>=1 : 
-        print("nb fichiers anglais")
-        print(len(liste_temp))
+        #print("nb fichiers anglais")
+        #print(len(liste_temp))
         serie_propre = (' '.join(liste_temp))
 
+        #Rajout de la série en BDD et récupération de l'ID
+        print("Insertion BDD")
+        idSerie = insert_serie(connexion, curseur, serie)
+        print("L'id de la serie "+serie+" est : ")
+        print(idSerie)
+    
     
         #Suppression des espaces en trop
         serie_propre = re.sub('\s+', ' ', serie_propre)
         serie_propre = serie_propre.split(' ')
     
-        print(serie_propre)
+        #print(serie_propre)
         #Calcul du tf de la serie 
         res_tf = calculer_tf(serie_propre)
 
-        for serie in res_tf:
-            for key, value in serie.items():
-                print(key,value)
+
+
+        #for serie in res_tf:
+            #for key, value in serie.items():
+                #print(key,value)
+                #Insérer le mot (key)
+                #Récuéprer l'id du mot
+                #Insérer dans la table contenir le tf + les autres infos
 
     print('Serie suivante')
 #fin for
 
+#Fermeture de l'accès à la BDD
+fermetureBDD(connexion, curseur)
 
 #print(liste_series)
 #print("tf")
