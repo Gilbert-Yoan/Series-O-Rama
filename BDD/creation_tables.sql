@@ -28,7 +28,7 @@ CREATE TABLE UTILISATEUR (
     isAdmin BOOLEAN
 );
 
-CREATE TABLE Noter (
+CREATE TABLE NOTER (
     ids INT,
     idu INT,
     note REAL CHECK (note <= 5.0 AND note >=0),
@@ -37,12 +37,10 @@ CREATE TABLE Noter (
     CONSTRAINT FK_NOTER_utilisateur FOREIGN KEY(idu) REFERENCES utilisateur(idu)
 );
 
-CREATE TABLE mot(
+CREATE TABLE MOT(
     idm SERIAL PRIMARY KEY,
     mot VARCHAR(45),
-    langue VARCHAR(2),
-    CONSTRAINT CK_LANGUE CHECK (langue IN ('FR','EN')),
-    CONSTRAINT UNIQUE_MOT_LG UNIQUE (mot,langue) 
+    CONSTRAINT UNIQUE_MOT UNIQUE (mot) 
 );
 
 CREATE TABLE CONTENIR(
