@@ -35,9 +35,9 @@ def connexionBDD ():
     #Création de la connexion
     conn = pg.connect(
         host="localhost",
-        database="postgres",
+        database="petut",
         user="postgres",
-        password="PauliNe1999",
+        password="passroot",
         port = '5432')
     #Création du curseur pour pouvoir manipuler la base
     cur = conn.cursor()
@@ -48,15 +48,13 @@ def fermetureBDD (connexion, curseur):
     curseur.close()
     connexion.close()
 
-
 #--------------------------------------------------------------------------------
 #Début du programme
 
 #Connexion a la BDD
 connexion, curseur = connexionBDD()
 
-
-res = get_search_results(curseur, "moriarty tyler burchell")
+res = get_search_results(curseur, "Magie Crime")
     
 print(res)
 #Fermeture de l'accès à la BDD
