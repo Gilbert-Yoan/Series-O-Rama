@@ -2,7 +2,6 @@
 import os
 from math import *
 import re
-from sqlite3 import Cursor 
 import nltk
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
@@ -198,15 +197,55 @@ def connexionBDD ():
     return conn, cur
 		
 
-#Rajout de la serie en BDD et retourne son id 
 #https://www.postgresqltutorial.com/postgresql-python/insert/
+#Rajout de la serie en BDD et retourne son id 
 def insert_serie(connexion, curseur, nom_serie):
-    sql = """INSERT INTO serietest(noms) VALUES(%s) RETURNING ids;"""
+    sql = """INSERT INTO serie(noms) VALUES(%s) RETURNING ids;"""
     curseur.execute(sql, (nom_serie,))
     connexion.commit()
     #Renvoi de l'ID de la serie
     return curseur.fetchone()[0]
 
+#Rajout du mot en BDD (s'il n'existe pas déjà)
+def insert_mot(connexion, curseur, mot):
+    sql = """INSERT INTO mot(mot) VALUES(%s) RETURNING idm;"""
+    curseur.execute(sql, (mot,))
+    connexion.commit()
+    #Renvoi de l'ID du mot
+    return curseur.fetchone()[0]
+
+
+#Rajout de la liaison entre le mot et la serie
+def insert_liaison_contenir(connexion, curseur, idMot, idSerie, tfMot):
+    sql = """INSERT INTO contenir(idm, ids,occurence) VALUES(%s,%s,%s);"""
+    curseur.execute(sql, (idMot,idSerie,tfMot,))
+    connexion.commit()
+
+
+def search_serie(connexion,curseur, serie):
+    sql = """SELECT * FROM serie WHERE noms=%s;"""
+    curseur.execute(sql, (serie,))
+    connexion.commit()
+
+    #Si la serie existe on renvoie son ID, sinon on renvoie None
+    res = curseur.fetchone()
+    if res is not None:
+        return res[0]
+    else:
+        return None
+
+def search_mot(connexion,curseur, mot):
+    sql = """SELECT * FROM mot WHERE mot=%s;"""
+    curseur.execute(sql, (mot,))
+    connexion.commit()
+
+    #Si le mot existe on renvoie son ID, sinon on renvoie None
+    res = curseur.fetchone()
+    if res is not None:
+        return res[0]
+    else:
+        return None
+    
 
 # Fermeture de la connexion à la base locale PostGreSQL
 def fermetureBDD (connexion, curseur):
@@ -248,45 +287,54 @@ for serie in noms_series :
                 if definition_langue_fichier(fichier_phrases)=='english':
                     fichier_phrases = traitement_mots(fichier_phrases)
 
-                    #Ajout du fichier prpore à la serie (1 fichier => 1 Chaine)
+                    #Ajout du fichier propre à la liste (1 fichier => 1 Chaine)
                     liste_temp.append(' '.join(fichier_phrases))
 
 
-    #print('LISTE TEMP')
     #print(liste_temp)
     print("Fin traitement serie : "+serie)
 
     
 
-    #Transformation de la serie en une chaine de caractère  (si la serie contient une version anglaise) et rajout dans la BDD
+    #Transformation de la serie en une chaine de caractère  (si la serie contient une version anglaise), calcul du TF et rajout dans la BDD
     if len(liste_temp)>=1 : 
-        #print("nb fichiers anglais")
         #print(len(liste_temp))
         serie_propre = (' '.join(liste_temp))
 
-        #Rajout de la série en BDD et récupération de l'ID
-        print("Insertion BDD")
-        idSerie = insert_serie(connexion, curseur, serie)
-        print("L'id de la serie "+serie+" est : ")
-        print(idSerie)
-    
-    
         #Suppression des espaces en trop
         serie_propre = re.sub('\s+', ' ', serie_propre)
         serie_propre = serie_propre.split(' ')
-    
         #print(serie_propre)
-        #Calcul du tf de la serie 
+
+        #Rajout de la série en BDD et récupération de l'ID
+        #Vérification que la serie n'existe pas déjà
+        res_search_serie = search_serie(connexion, curseur,serie)
+
+        #Si la serie n'existe pas on l'insère dans la BDD
+        if res_search_serie is None:
+            idSerie = insert_serie(connexion, curseur, serie)
+        #Si la serie existe on récupère juste son id
+        else:
+            idSerie=res_search_serie
+       
+
+        #Calcul du tf pour les mots de la serie 
         res_tf = calculer_tf(serie_propre)
 
+        for key, value in res_tf[0].items():
+            #Vérifier que le mot n'existe pas déjà
+            res_search_mot = search_mot(connexion, curseur,key)
 
+            #Si le mot n'existe pas on l'insère dans la BDD
+            if res_search_mot is None:
+                idMot = insert_mot(connexion, curseur, key)
+            #Si le mot existe on récupère juste son id
+            else:
+                idMot=res_search_mot
+           
+            #Insertion dans la table Contenir du mot, de la serie et du tf
+            insert_liaison_contenir(connexion, curseur, idMot, idSerie, value)
 
-        #for serie in res_tf:
-            #for key, value in serie.items():
-                #print(key,value)
-                #Insérer le mot (key)
-                #Récuéprer l'id du mot
-                #Insérer dans la table contenir le tf + les autres infos
 
     print('Serie suivante')
 #fin for
@@ -294,18 +342,6 @@ for serie in noms_series :
 #Fermeture de l'accès à la BDD
 fermetureBDD(connexion, curseur)
 
-#print(liste_series)
-#print("tf")
-#print(calculer_tf(liste_series))#[0])
-#print("df")
-#print(calculer_tf(liste_series)[1])
-#print("idf")
-#print(calculer_idf(liste_series,calculer_tf(liste_series)[1]))
-#print("tf*idf")
-#print(calculer_tf_idf(calculer_tf(liste_series)[0],calculer_idf(liste_series,calculer_tf(liste_series)[1])))
-
-
- #- Si la serie ne possede pas de version anglaise est-ce qu'on l'ajoute dans la BDD ? 
  
 
 
