@@ -7,6 +7,14 @@ from nltk.corpus import stopwords
 from nltk.corpus import wordnet
 from nltk.stem import WordNetLemmatizer
 import psycopg2 as pg
+import sys
+
+#Liste des fichiers à importer
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+python_target = os.path.join(curr_dir,"..","preprocessing")
+sys.path.append(python_target)
+from methodes_preprocessing import *
+
 
 #Ici on suppose que les search_words sont des chaines de caractères simples séparées par des espaces
 def get_search_results(cursor, search_words):

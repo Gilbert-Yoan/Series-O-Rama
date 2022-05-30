@@ -11,7 +11,9 @@ import langid
 import psycopg2 as pg
 
 #Liste des fichiers à importer
-sys.path.append( 'D:\LP\ProjetLP\Series-O-Rama\BDD\config')
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+config_path = os.path.join(curr_dir,"..","BDD","config")
+sys.path.append(config_path)
 from config import *
 
 #--------------------------------------------------------------------------------
