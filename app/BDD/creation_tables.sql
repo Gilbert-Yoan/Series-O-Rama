@@ -39,7 +39,7 @@ CREATE TABLE NOTER (
 
 CREATE TABLE MOT(
     idm SERIAL PRIMARY KEY,
-    mot VARCHAR(45),
+    mot VARCHAR(100),
     CONSTRAINT UNIQUE_MOT UNIQUE (mot) 
 );
 
@@ -55,7 +55,7 @@ CREATE TABLE CONTENIR(
 CREATE TABLE CHERCHER(
     idu INT,
     idm INT,
-    temps TIMESTAMP default current_timestamp,
+    date_rech TIMESTAMP default current_timestamp,
     CONSTRAINT PK_CHERCHER PRIMARY KEY (idu,idm),
     CONSTRAINT FK_CHERCHER_UTILISATEUR FOREIGN KEY (idu) REFERENCES utilisateur,
     CONSTRAINT FK_CHERCHER_mot FOREIGN KEY (idm) REFERENCES mot

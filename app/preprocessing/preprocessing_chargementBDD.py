@@ -21,7 +21,7 @@ liste_temp = []
 #Pour chaque série on va
 for serie in noms_series :
     liste_temp= []
-    print('Hello serie'+ serie)
+    print('Hello serie '+ serie)
     #Ouvrir le dossier correspondant
     with os.scandir(chemin_dossier+'\\'+serie) as liste_fichiers_st :
         #Pour chaque fichier de sous-titre
