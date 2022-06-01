@@ -2,7 +2,7 @@
 
 for f in "$@" ;
 do
-    unzip -o -d `dirname $f` $f2
+    unzip -o -d `dirname $f` $f
     if [ "$?" -eq "0" ]
     then
         rm $f;

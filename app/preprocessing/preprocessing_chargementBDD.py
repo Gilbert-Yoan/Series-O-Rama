@@ -1,7 +1,7 @@
 import sys
 
 #Liste des fichiers à importer
-sys.path.append( 'D:\LP\ProjetLP\Series-O-Rama\preprocessing')
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from methodes_preprocessing import *
 
 
@@ -12,7 +12,7 @@ from methodes_preprocessing import *
 connexion, curseur = connexionBDD()
 
 #Récupération du nom de toutes les entrées contenues dans le dossier sous-titres (ici on va tester avec un dossier plus petit)
-chemin_dossier = 'D:\\LP\\ProjetLP\\sr_test'
+chemin_dossier = sys.argv[1]
 noms_series = os.listdir(chemin_dossier)
 
 serie_propre = ""
