@@ -1,0 +1,6 @@
+[postgresql]
+host=localhost
+database=petut
+user=postgres
+password=passroot
+port=5432

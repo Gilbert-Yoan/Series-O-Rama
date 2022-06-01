@@ -203,6 +203,12 @@ def insert_liaison_contenir(connexion, curseur, idMot, idSerie, tfMot):
     curseur.execute(sql, (idMot,idSerie,tfMot,))
     connexion.commit()
 
+#Mise à jour de la liaison contenir
+def update_liaison_serie(connexion, curseur,idMot,idSerie,tfMot):
+    sql = """UPDATE contenir SET occurence=%s WHERE idm=%s AND ids=%s;"""
+    curseur.execute(sql, (tfMot,idMot,idSerie,))
+    connexion.commit()
+
 
 def search_serie(connexion,curseur, serie):
     sql = """SELECT * FROM serie WHERE noms=%s;"""
@@ -225,6 +231,19 @@ def search_mot(connexion,curseur, mot):
     res = curseur.fetchone()
     if res is not None:
         return res[0]
+    else:
+        return None
+
+
+def search_contenir(connexion,curseur, idSerie, idMot):
+    sql = """SELECT * FROM contenir WHERE idm=%s AND ids=%s;"""
+    curseur.execute(sql, (idMot,idSerie,))
+    connexion.commit()
+
+    #Si la liaison existe on renvoie le tf, sinon on renvoie None
+    res = curseur.fetchone()
+    if res is not None:
+        return res[2]
     else:
         return None
     

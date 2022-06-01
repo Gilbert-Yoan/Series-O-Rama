@@ -1,5 +1,4 @@
 import sys
-
 #Liste des fichiers à importer
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from methodes_preprocessing import *
@@ -23,11 +22,11 @@ for serie in noms_series :
     liste_temp= []
     print('Hello serie '+ serie)
     #Ouvrir le dossier correspondant
-    with os.scandir(chemin_dossier+'\\'+serie) as liste_fichiers_st :
+    with os.scandir(os.path.join(chemin_dossier, serie)) as liste_fichiers_st :
         #Pour chaque fichier de sous-titre
         for fichier in liste_fichiers_st:
             #ouvrir le ficher
-            fileObj = open(chemin_dossier+'\\'+serie+'\\'+fichier.name, "r",encoding='latin-1')
+            fileObj = open(os.path.join(chemin_dossier, serie, fichier.name), "r",encoding='latin-1')
             #stocker les phrases dans un array temporaire
             fichier_phrases = fileObj.read().splitlines()
             #fermer le fichier
@@ -77,9 +76,22 @@ for serie in noms_series :
             #Si le mot existe on récupère juste son id
             else:
                 idMot=res_search_mot
-           
-            #Insertion dans la table Contenir du mot, de la serie et du tf
-            insert_liaison_contenir(connexion, curseur, idMot, idSerie, value)
+
+
+            #Vérifier que la liaison n'existe pas déjà
+            res_search_contenir=search_contenir(connexion, curseur,idSerie,idMot)
+            
+            #Si la liaison n'existe pas  on insert dans la table Contenir le mot, la serie et le tf 
+            if res_search_contenir is None:
+                insert_liaison_contenir(connexion, curseur, idMot, idSerie, value)
+            #Si elle existe on met à jour la liaison
+            else:
+                #Calculer le nouveau tf
+                new_tf=value+res_search_contenir
+                
+                #Mise à jour de la liaison
+                update_liaison_serie(connexion, curseur,idMot,idSerie,new_tf)
+                
 #fin for
 
 
