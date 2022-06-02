@@ -199,7 +199,7 @@ const OlderMot =(request,responce)=>{
     const Idu = request.body.Idu
     config.query(
         
-        "Select Min(temps),idm,mot from chercher join mot using(idm) where idu= "+Idu+" group by idm , mot Limit 1 "
+        "Select Min(date_rech),idm,mot from chercher join mot using(idm) where idu= "+Idu+" group by idm , mot Limit 1 "
         ,
         (error,result)=> {
 
@@ -236,7 +236,7 @@ const UpdateMotRecher =(request,responce)=>{
 
     config.query(
 
-        "Update chercher set idm ="+idm+" ,temps = now() where idu = "+idu+" and idm ="+idom+" ;"
+        "Update chercher set idm ="+idm+" ,date_rech = now() where idu = "+idu+" and idm ="+idom+" ;"
         ,
         (error,result)=> {
 
