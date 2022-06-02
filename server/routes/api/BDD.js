@@ -6,10 +6,10 @@ const {spawn} = require("child_process")
 
 var config = new pg({
 
-host:"Localhost",
-user:"postgres",
+host:"localhost",
+user:"serieorama",
 password:"passroot",
-database:"DB",
+database:"serieorama",
 port:5432
 })
 

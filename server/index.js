@@ -12,9 +12,9 @@ const post = require("./routes/api/api")
 app.use("/api",post)
 
 var Port = 1313
-if(process.env.NODE_ENV==="Production"){
+if(process.env.NODE_ENV==="production"){
         app.use('/',express.static(__dirname+"/public/"));
-        app.length(/.*/,(req,res)=>res.sendFile(__dirname+"/public/index.html"))
+        app.get(/.*/,(req,res)=>res.sendFile(__dirname+"/public/index.html"))
         
 }
 

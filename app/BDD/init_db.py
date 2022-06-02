@@ -71,4 +71,17 @@ CREATE TABLE CHERCHER( \
 connexion, curseur = connexionBDD()
 curseur.execute(query)
 connexion.commit()
+
+query_default_user = "INSERT INTO utilisateur VALUES (1,'user_default',null,null,False);"
+curseur.execute(query_default_user)
+connexion.commit()
+
+query_function = "CREATE OR REPLACE FUNCTION defNote() RETURNS TRIGGER\
+    AS $$ BEGIN INSERT INTO noter(idu,ids,note) VALUES (1, new.ids, 0); RETURN NEW; END; $$ LANGUAGE plpgsql;"
+
+query_trigger = "CREATE TRIGGER triggerDefNotes AFTER INSERT ON SERIE FOR EACH ROW\
+    EXECUTE PROCEDURE defNote();"
+curseur.execute(query_trigger)
+connexion.commit()
+
 fermetureBDD(connexion,curseur)
