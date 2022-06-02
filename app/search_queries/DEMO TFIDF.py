@@ -39,12 +39,12 @@ def get_search_results(cursor, search_words):
     res = traitement_mots(words_list_en)
     #print(res) pour afficher les résultats lemmatizés
     res = []
-    for word in words_list:
+    for word in words_list_en:
         query = "WITH allDoc AS (SELECT COUNT(s.ids) total FROM serie s) , \
                 word_DF AS (SELECT COUNT(s.ids) as df FROM serie s, contenir c, mot m WHERE m.idm = c.idm AND s.ids = c.ids AND LOWER(m.mot) = LOWER(%s)), \
                 word_doc AS (SELECT c.occurence curr_occ, m.mot mot, s.ids serie_id, s.noms nom FROM serie s, contenir c, mot m \
                         WHERE m.idm = c.idm AND s.ids = c.ids AND m.mot = LOWER(%s)) \
-                SELECT serie_id, nom, mot,curr_occ tf,df, LOG(2.0, total/df) idf, curr_occ*LOG(2.0, total/df) as tfidf FROM word_df, allDoc, word_doc;"
+                SELECT serie_id, nom, curr_occ*LOG(2.0, total/df) as tfidf FROM word_df, allDoc, word_doc ORDER BY tfidf DESC;"
 
         cursor.execute(query, (word, word))
         res.append(cursor.fetchall())
@@ -58,7 +58,7 @@ def get_search_results(cursor, search_words):
 connexion, curseur = connexionBDD()
 
 #Test français anglais pour traduction
-res = get_search_results(curseur, "château magie studies was cavalry chivalry")
+res = get_search_results(curseur, sys.argv[1])
     
 print(res)
 #Fermeture de l'accès à la BDD

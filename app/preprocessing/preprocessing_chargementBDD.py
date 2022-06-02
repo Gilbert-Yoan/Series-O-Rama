@@ -1,4 +1,6 @@
 import sys
+import os 
+
 #Liste des fichiers à importer
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from methodes_preprocessing import *
