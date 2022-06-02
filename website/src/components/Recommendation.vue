@@ -310,8 +310,8 @@ export default ({
     if (user !== null && user !== "[]" ){
 
       this.user = JSON.parse(user)
-      let Note = Api.TestNoter(this.user[0].idu)
-      
+      let Note = await  Api.TestNoter(this.user[0].idu)
+      console.log(Note);
       if (Note.length !== 0){
         let LesSeriesNoNoter = await Api.SerieNonNoter(this.user[0].idu)
         console.log(LesSeriesNoNoter)
@@ -335,7 +335,7 @@ export default ({
       else{
         let recherche = await Api.RechercheTest(this.user[0].idu)
         if (recherche.length !== 0) { // Test si il a chercher avec des mot
-          this.series = await Api.RecoViaRecherche
+          this.series = await Api.RecoViaRecherche(this.user[0].idu)
         }else{
           this.series = await Api.GetRecoRAND()
         }
@@ -438,31 +438,39 @@ export default ({
       console.log(StringFinal)
       this.Recherche(StringFinal)
     },//Decoupe la chaine taper par l'utilisateur par des espace mise en forme ('njn',...)
-    async Recherche(String){
-      this.series = await Api.REcherche(String)
-      if (this.IsConnect === true){
-        var table = this.StringRecherche.split(" ")
-        for (const mot of table) {
-          let Nbrecherche = await  Api.TestNbMotRechercher(this.user[0].idu)
-          if (Nbrecherche[0].count < 5){
-            let theMot =  await Api.TestMotexiste(mot)
+    async Recherche(){
+       this.REsRecherche = await Api.PythonRecherche(this.StringRecherche)
+          this.SerieRecherche(this.REsRecherche)
+          
+          if (this.IsConnect === true){
+            var table = this.StringRecherche.split(" ")
+            for (const mot of table) {
+              console.log(mot);
+             let Nbrecherche = await  Api.TestNbMotRechercher(this.user[0].idu)
+              if (Nbrecherche[0].count < 5){
+                let theMot =  await Api.TestMotexiste(mot)
+                console.log(theMot);
+                if (theMot.length >0){
+                  var Ismotsearch = await Api.IsCherchermot(this.user[0].idu,theMot[0].idm)
+                  console.log(Ismotsearch);
+                  if (Ismotsearch.length  == 0) {
+                    await Api.InsertMot(this.user[0].idu,theMot[0].idm)
+                  }
+      
+                }
+              
+              }else {
+                let oldermot = await Api.OlderMot(this.user[0].idu)
+                let theMot = await Api.TestMotexiste(mot)
+                
+                if (theMot.length > 0) {
+                  await Api.UpdateMotRecher(this.user[0].idu, theMot[0].idm,oldermot[0].idm)
+                }
 
-            if (theMot.length >0){
-              await Api.InsertMot(this.user[0].idu,theMot[0].idm)
+              }
+              
             }
-
-          }else {
-            let oldermot = await Api.OlderMot(this.user[0].idu)
-            let theMot = await Api.TestMotexiste(mot)
-
-            if (theMot.length > 0) {
-              await Api.UpdateMotRecher(this.user[0].idu, theMot[0].idm,oldermot[0].idm)
-            }
-
           }
-
-        }
-      }
 
     },//Permet de faire la requette pour la recherche. Prend le un string sous forme ('khbkh',...)
     AddSerie(){
@@ -489,7 +497,22 @@ export default ({
       }
 
 
-    }
+    },
+    SerieRecherche(LesSeries){
+        var tab =[];
+        this.series =[]
+        tab = LesSeries.split(';')
+        for (const Serie of tab) {
+            var res = Serie.split("@")
+            var object ={
+              id:res[0],
+              noms:res[1],
+              rating:Number(res[2]).toPrecision(2)
+            }
+            this.series.push(object)
+        }
+        console.log(this.series);
+      }
   },
 
 })

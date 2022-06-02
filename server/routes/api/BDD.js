@@ -2,6 +2,7 @@
 
 const pg = require("pg").Pool;
 const fs = require("fs");
+const {spawn} = require("child_process")
 
 var config = new pg({
 
@@ -83,7 +84,7 @@ const string = request.body.String
 const GETRecoRAND =(request,responce)=>{
 
     config.query("SELECT AVG(note)::numeric(10,1) as rating ,serie.noms\n" +
-        "FROM NOTER join serie on noter.ids = serie.ids group by serie.noms order by random() limit 2;",
+        "FROM NOTER join serie on noter.ids = serie.ids group by serie.noms order by random() limit 20;",
         (error,result)=>{
 
             if (error) {
@@ -153,7 +154,7 @@ const SerieNonNoter =(request,responce)=>{
 const RechercheTest =(request,responce)=>{
     const Idu = request.body.Idu
     config.query(
-        "Select * from cherche where idu="+Idu,
+        "Select * from chercher where idu="+Idu,
         (error,result)=> {
 
             if (error) {
@@ -165,8 +166,9 @@ const RechercheTest =(request,responce)=>{
 }
 const RecoViaRecherche =(request,responce)=>{
     const Idu = request.body.Idu
+    console.log(Idu)
     config.query(
-        "SELECT s.ids, s.nomS, AVG(n.note) FROM serie s, contenir c, noter n " +
+        "SELECT s.ids, s.nomS,  AVG(n.note)::numeric(10,1) as rating FROM serie s, contenir c, noter n " +
         "WHERE c.ids = n.ids AND c.ids = s.ids " +
         "AND c.idm IN (SELECT idm FROM CHERCHER WHERE idu="+Idu+")" +
         "GROUP BY s.ids, s.nomS;",
@@ -212,7 +214,7 @@ const TestMotexiste =(request,responce)=>{
     const Mot = request.body.Mot
     config.query(
 
-        "Select * from mot where mot = '"+Mot+"'"
+        "Select * from mot where LOWER(mot) = LOWER('"+Mot+"')"
         ,
         (error,result)=> {
 
@@ -339,10 +341,10 @@ const  CopyFichier=(request,responce)=>{
     const  Data= request.body.Text
     const  NomSerie= request.body.NomSerie
 
-    if (!fs.existsSync("../Source/"+NomSerie)){
-        fs.mkdirSync("../Source/"+NomSerie, { recursive: true });
+    if (!fs.existsSync("../DELTA/"+NomSerie)){
+        fs.mkdirSync("../DELTA/"+NomSerie, { recursive: true });
     }
-    Nomfichier = "../Source/" + NomSerie + "/"+Nomfichier
+    Nomfichier = "../DELTA/" + NomSerie + "/"+Nomfichier
     fs.writeFile(Nomfichier, Data, err2 => {
         if (err2) {
           console.log(err2);
@@ -351,6 +353,48 @@ const  CopyFichier=(request,responce)=>{
         responce.status(200).json(true);
     })
 
+}
+
+const  PythonRecherche=(request,responce)=>{
+    const Chaine=request.body.Chaine
+    console.log(Chaine)
+
+   const process = spawn('python',['../app/search_queries/DEMO TFIDF.py',Chaine])
+   var datatostring
+   process.stdout.on('data',(data) =>{
+
+        datatostring = data
+
+   })
+   process.stderr.on('data',(data)=>{
+
+    console.log('err:' + data)
+
+   })
+   process.on('close',(code)=>{
+
+    responce.send(datatostring)
+
+
+   })
+}
+const  IsCherchermot=(request,responce)=>{
+    const idm = request.body.idm
+    const  idu= request.body.idu
+    
+    
+    config.query(
+
+        "Select * from chercher where idm= "+idm+" and idu=" +idu +";"
+        ,
+        (error,result)=> {
+
+            if (error) {
+                throw error
+            }
+            responce.status(200).json(result.rows);
+        }
+    )
 }
 module.exports ={
 
@@ -373,5 +417,7 @@ TestNoter,
     InsertNote,
     GetIds,
     UPDAteNote,
-    CopyFichier
+    CopyFichier,
+    PythonRecherche,
+    IsCherchermot
 }

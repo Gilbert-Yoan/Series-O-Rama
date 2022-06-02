@@ -17,7 +17,7 @@
         ></v-text-field>
         
     </v-col>
-    <v-icon @click="CoupeChaineRecherche()">{{icon.mdiMagnify}}</v-icon>
+    <v-icon @click="Recherche()">{{icon.mdiMagnify}}</v-icon>
      <v-spacer></v-spacer>
     <v-btn
         elevation="2"
@@ -301,7 +301,7 @@
 <script>
 
 import LocaleLangue from "../i18n" 
-import { mdiMagnify,mdiPlusBox,mdiEye,mdiEyeOff    } from '@mdi/js';
+import { mdiMagnify,mdiPlusBox,mdiEye,mdiEyeOff, } from '@mdi/js';
 import  Api from "../Api"
 export default ({
   
@@ -327,6 +327,7 @@ export default ({
         series :[],
         loginConnect:"",
         password:"",
+        REsRecherche:"",
         user:[],
         email:"",
         LoginCreate:"",
@@ -405,17 +406,25 @@ export default ({
         console.log(StringFinal)
         this.Recherche(StringFinal)
         },//Decoupe la chaine taper par l'utilisateur par des espace mise en forme ('njn',...)
-        async Recherche(String){
-          this.series = await Api.REcherche(String)
+        async Recherche(){
+          this.REsRecherche = await Api.PythonRecherche(this.StringRecherche)
+          this.SerieRecherche(this.REsRecherche)
+          
           if (this.IsConnect === true){
             var table = this.StringRecherche.split(" ")
             for (const mot of table) {
+              console.log(mot);
              let Nbrecherche = await  Api.TestNbMotRechercher(this.user[0].idu)
               if (Nbrecherche[0].count < 5){
                 let theMot =  await Api.TestMotexiste(mot)
-                
+                console.log(theMot);
                 if (theMot.length >0){
-                  await Api.InsertMot(this.user[0].idu,theMot[0].idm)
+                  var Ismotsearch = await Api.IsCherchermot(this.user[0].idu,theMot[0].idm)
+                  console.log(Ismotsearch);
+                  if (Ismotsearch.length  == 0) {
+                    await Api.InsertMot(this.user[0].idu,theMot[0].idm)
+                  }
+      
                 }
               
               }else {
@@ -456,6 +465,21 @@ export default ({
         }
         
 
+      },
+      SerieRecherche(LesSeries){
+        var tab =[];
+        this.series =[]
+        tab = LesSeries.split(';')
+        for (const Serie of tab) {
+            var res = Serie.split("@")
+            var object ={
+              id:res[0],
+              noms:res[1],
+              rating:Number(res[2]).toPrecision(2)
+            }
+            this.series.push(object)
+        }
+        console.log(this.series);
       }
     },
     

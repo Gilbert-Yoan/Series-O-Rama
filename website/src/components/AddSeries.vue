@@ -105,21 +105,29 @@
   </v-file-input>
   </v-col>
   </template>
+
+  <v-col v-if="Succesfull == true">
+    <v-col>
+    <v-icon x-large class="group pa-2 green">{{icon.mdiCheckBold}}</v-icon>{{$t('Successfully Uploaded')}}
+    </v-col>
+  </v-col>
   </div>
 </template>
 
 <script>
 import LocaleLangue from "../i18n" 
 import  Api from "../Api"
-import { mdiMagnify,mdiPlusBox  } from '@mdi/js';
+import { mdiMagnify,mdiPlusBox,mdiCheckBold   } from '@mdi/js';
 export default ({
 
   data :() => ({
       icon:{
         mdiMagnify,
-        mdiPlusBox 
+        mdiPlusBox,
+        mdiCheckBold
       },
           series :[],
+          Succesfull:false,
       files:[],
       AddNomSerie:"",
       SeriesSelected:""
@@ -155,7 +163,8 @@ export default ({
             })
         },
         async read(){
-          console.log(this.files);
+          
+          this.Succesfull = false;
           for(const fichie of this.files) {
             var Nomfichier = fichie.name
             var data = await fichie.text()
@@ -167,7 +176,8 @@ export default ({
             }
             
            
-          }
+          }this.Succesfull = true;
+          this.files= [];
           this.AddNomSerie =""
         }
 

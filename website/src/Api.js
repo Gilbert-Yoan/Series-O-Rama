@@ -410,6 +410,47 @@ static SerieNonNoter(Idu){
         });
 
     }
+    static  PythonRecherche(Chaine){
+
+        return new Promise((resolve,reject)=>{
+
+            axios.post("api/PythonRecherche", {Chaine:Chaine})
+                .then((res)=>{
+
+                    const data = res.data;
+
+                    resolve(data)
+                })
+                .catch((err)=>{
+                    reject(err)
+
+
+                });
+
+        });
+
+    }
+
+    static  IsCherchermot(idu,idm){
+
+        return new Promise((resolve,reject)=>{
+
+            axios.post("api/IsCherchermot", {idu:idu,idm:idm})
+                .then((res)=>{
+
+                    const data = res.data;
+
+                    resolve(data)
+                })
+                .catch((err)=>{
+                    reject(err)
+
+
+                });
+
+        });
+
+    }
 }//classe
 
 export default Api;

@@ -23,4 +23,6 @@ router.post('/InsertNote',db.InsertNote)
 router.post('/GetIDS',db.GetIds)
 router.post('/UpdateNote',db.UPDAteNote)
 router.post('/CopyFichier',db.CopyFichier)
+router.post('/PythonRecherche',db.PythonRecherche)
+router.post('/IsCherchermot',db.IsCherchermot)
 module.exports = router;
