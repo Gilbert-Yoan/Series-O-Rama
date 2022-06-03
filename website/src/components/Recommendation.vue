@@ -503,7 +503,7 @@ export default ({
         this.series =[]
         tab = LesSeries.split(';')
         for (const Serie of tab) {
-            var res = Serie.split("@")
+            var res = Serie.split("~")
             var object ={
               id:res[0],
               noms:res[1],

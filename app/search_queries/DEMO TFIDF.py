@@ -58,7 +58,7 @@ def get_search_results(cursor, search_words):
             query = "SELECT CASE WHEN EXISTS (SELECT note from noter where ids=%s) THEN AVG(note) ELSE 0 END FROM noter WHERE ids=%s;"
             cursor.execute(query, (tup[0],tup[0]))
             note = cursor.fetchall()
-            res_str = res_str +str(tup[0]) + "@" + tup[1] + "@" + str(note[0][0]) +";" 
+            res_str = res_str +str(tup[0]) + "~" + tup[1] + "~" + str(note[0][0]) +";" 
 
     return res_str[:-1]
 
