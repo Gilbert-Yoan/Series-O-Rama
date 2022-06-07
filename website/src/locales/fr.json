@@ -1,20 +1,39 @@
 {
-    "Seach": "Rechercher",
-    "Home":"Accueil",
-    "Recomendation":"Recommandation",
-    "Login":"Se connecter",
-    "Our Series" :"Nos Series",
-    "Rate this series":"Noter cette Series",
-    "Connect":"Se Connecter",
-    "The most seen" :"Les plus vue:",
-    "Series Name":"Nom de la Serie",
-    "Drop Files":"Deposer fichier ici",
-    "Disconnect":"Se deconnecter",
-    "Add Series":"Ajouter Series",
-    "Edit Account":"editer le compte",
-    "Password":"Mot de passe",
-  "Login:":"Identifiant",
-  "Create Account":"Créé un compte",
-  "Create":"Créé",
-  "Successfully Uploaded":"Fichier(s) téléchargé(s) avec succès"
+
+  "Search": "Rechercher",
+
+  "Home":"Accueil",
+
+  "Recommendation":"Recommandation",
+
+  "Login":"Se connecter",
+
+  "Our Series" :"Nos Series",
+
+  "Rate this serie":"Noter cette Serie",
+
+  "Connect":"Se Connecter",
+
+  "The most seen" :"Les plus vues:",
+
+  "Series Name":"Nom de la Serie",
+
+  "Drop Files":"Deposer fichier ici",
+
+  "Disconnect":"Se deconnecter",
+
+  "Add Series":"Ajouter des Series",
+
+  "Edit Account":"Editer le compte",
+
+  "Password":"Mot de passe",
+
+"Login:":"Identifiant",
+
+"Create Account":"Créer un compte",
+
+"Create":"Créer",
+
+"Successfully Uploaded":"Fichier(s) téléchargé(s) avec succès"
+
 }

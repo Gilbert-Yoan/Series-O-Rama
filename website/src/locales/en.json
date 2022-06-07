@@ -1,20 +1,39 @@
 {
-  "Seach": "Search",
+
+  "Search": "Search",
+
   "Home":"Home",
-  "Recomendation":"Recommendation",
+
+  "Recommendation":"Recommendation",
+
   "Login":"Log in",
+
   "Our Series" :"Our Series",
+
   "Rate this series":"Rate this series",
+
   "Connect":"Connect",
+
   "The most seen" :"The most seen:",
+
   "Series Name":"Series Name",
+
   "Drop Files":"Drop files here",
+
   "Disconnect":"Disconnect",
+
   "Add Series":"Add Series",
+
   "Edit Account":"Edit Account",
+
   "Password":"Password",
+
   "Login:":"Login",
+
   "Create Account":"Create Account",
+
   "Create":"Create",
+
   "Successfully Uploaded":"Successfully Uploaded"
+
 }
